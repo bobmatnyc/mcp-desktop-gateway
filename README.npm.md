@@ -15,7 +15,7 @@ Universal MCP (Model Context Protocol) Gateway for Claude Desktop - a Python-bas
 ### 1. Install via NPM
 
 ```bash
-npm install -g @mcp/desktop-gateway
+npm install -g @bobmatnyc/mcp-desktop-gateway
 ```
 
 This will:
@@ -116,7 +116,7 @@ MCP Gateway requires Python 3.8+. Install it from:
 If you get permission errors during installation:
 
 ```bash
-sudo npm install -g @mcp/desktop-gateway
+sudo npm install -g @bobmatnyc/mcp-desktop-gateway
 ```
 
 ### Gateway Not Connecting

@@ -3,7 +3,7 @@
 **Version**: 1.0.0 (Stable)  
 **License**: MIT  
 **Status**: Active Development  
-**NPM Package**: `@mcp/desktop-gateway`
+**NPM Package**: `@bobmatnyc/mcp-desktop-gateway`
 
 ## Overview
 
@@ -73,7 +73,7 @@ mcp-desktop-gateway/
 ### Via NPM (Recommended)
 
 ```bash
-npm install -g @mcp/desktop-gateway
+npm install -g @bobmatnyc/mcp-desktop-gateway
 ```
 
 ### Development Setup
@@ -205,7 +205,7 @@ class ResourceDefinition:
 ### Common Issues
 
 1. **Python not found**: Install Python 3.8+ 
-2. **Permission errors**: Use `sudo npm install -g @mcp/desktop-gateway`
+2. **Permission errors**: Use `sudo npm install -g @bobmatnyc/mcp-desktop-gateway`
 3. **Connection failed**: Check logs at `~/Library/Logs/Claude/mcp-server-mcp-desktop-gateway.log`
 
 ### Debug Mode

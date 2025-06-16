@@ -1,6 +1,6 @@
 # MCP Desktop Gateway
 
-[![npm version](https://img.shields.io/npm/v/@mcp/desktop-gateway.svg)](https://www.npmjs.com/package/@mcp/desktop-gateway)
+[![npm version](https://img.shields.io/npm/v/@bobmatnyc/mcp-desktop-gateway.svg)](https://www.npmjs.com/package/@bobmatnyc/mcp-desktop-gateway)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Node.js 16+](https://img.shields.io/badge/node-16+-green.svg)](https://nodejs.org)
@@ -23,10 +23,10 @@ Universal MCP Gateway for Claude Desktop - Python-based bridge with built-in sys
 
 ```bash
 # Install globally via NPM
-npm install -g @mcp/desktop-gateway
+npm install -g @bobmatnyc/mcp-desktop-gateway
 
-# Configure Claude Desktop
-mcp-desktop-gateway config
+# Auto-configure Claude Desktop
+curl -sSL https://raw.githubusercontent.com/bobmatnyc/mcp-desktop-gateway/main/scripts/install-claude-config.sh | bash
 
 # Restart Claude Desktop
 ```
@@ -180,7 +180,7 @@ python scripts/version.py tag
 
 2. **Permission errors**
    ```bash
-   sudo npm install -g @mcp/desktop-gateway
+   sudo npm install -g @bobmatnyc/mcp-desktop-gateway
    ```
 
 3. **Gateway not connecting**

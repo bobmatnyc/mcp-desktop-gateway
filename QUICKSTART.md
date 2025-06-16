@@ -3,7 +3,7 @@
 ## Installation (One Time)
 
 ```bash
-npm install -g @mcp/desktop-gateway
+npm install -g @bobmatnyc/mcp-desktop-gateway
 mcp-desktop-gateway config
 # Restart Claude Desktop
 ```

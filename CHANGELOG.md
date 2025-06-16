@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Complete MCP Desktop Gateway Implementation**: Production-ready universal bridge for Claude Desktop
 - **Multi-Connector Architecture**: Modular system supporting shell, AppleScript, hello_world, and gateway_utils connectors
-- **NPM Package Distribution**: Published as `@mcp/desktop-gateway` with automated setup
+- **NPM Package Distribution**: Published as `@bobmatnyc/mcp-desktop-gateway` with automated setup
 - **Comprehensive Test Suite**: 100+ unit tests covering core components and connectors (~60-70% coverage)
 - **AppleScript Automation**: macOS-specific connectors for Safari, Contacts, Messages, and Finder
 - **User Scripts Management**: Organized system for ad-hoc Python, JavaScript, Shell, and AppleScript code

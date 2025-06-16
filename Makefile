@@ -20,8 +20,8 @@ run-simple: ## Run simple gateway
 	@echo "Running Simple MCP Desktop Gateway..."
 	@./venv/bin/python run_mcp_gateway_simple.py
 
-test: ## Run Python tests
-	@echo "Running tests..."
+test-python: ## Run Python tests (deprecated - use 'make test')
+	@echo "Running Python tests..."
 	@./venv/bin/python -m pytest tests/ -v
 
 test-npm: ## Test NPM package locally
