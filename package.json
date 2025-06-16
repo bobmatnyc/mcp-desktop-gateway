@@ -1,6 +1,6 @@
 {
   "name": "@mcp/desktop-gateway",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Universal MCP Gateway for Claude Desktop - Python-based bridge with built-in connectors",
   "main": "lib/cli.js",
   "bin": {

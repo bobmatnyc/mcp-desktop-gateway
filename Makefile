@@ -76,7 +76,7 @@ test-mcp-current: ## Test currently configured MCP services
 test-mcp-local: ## Test local MCP Desktop Gateway service
 	@echo "🧪 Testing local MCP Desktop Gateway..."
 	@echo "   Starting service for 3 seconds to verify it loads..."
-	@( ./venv/bin/python run_mcp_gateway.py & PID=$$!; sleep 3; kill $$PID 2>/dev/null ) 2>&1 | grep -q "MCP Desktop Gateway Started" && \
+	@( ./venv/bin/python run_mcp_gateway.py & PID=$$!; sleep 3; kill $$PID 2>/dev/null ) 2>&1 | grep -q "MCP Gateway Started" && \
 		echo "   ✅ Local MCP Desktop Gateway starts successfully" || \
 		echo "   ❌ Local MCP Desktop Gateway failed to start"
 
@@ -84,6 +84,25 @@ test-mcp-npm: ## Test NPM package MCP Desktop Gateway (must be installed)
 	@echo "🧪 Testing NPM package MCP Desktop Gateway..."
 	@which mcp-desktop-gateway > /dev/null || (echo "❌ mcp-desktop-gateway not found. Run 'npm install -g mcp-desktop-gateway' first"; exit 1)
 	@./venv/bin/python scripts/test_mcp_service.py service "mcp-desktop-gateway (npm)" "mcp-desktop-gateway"
+
+test: ## Run unit tests
+	@echo "🧪 Running unit tests..."
+	@./venv/bin/python scripts/run_tests.py
+
+test-unit: ## Run only unit tests
+	@echo "🧪 Running unit tests..."
+	@./venv/bin/python scripts/run_tests.py tests/unit/ -v
+
+test-integration: ## Run only integration tests
+	@echo "🧪 Running integration tests..."
+	@./venv/bin/python scripts/run_tests.py tests/integration/ -v
+
+test-coverage: ## Run tests with coverage report
+	@echo "🧪 Running tests with coverage..."
+	@./venv/bin/pip install coverage > /dev/null 2>&1 || true
+	@PYTHONPATH=src ./venv/bin/python -m coverage run -m pytest tests/
+	@./venv/bin/python -m coverage report
+	@./venv/bin/python -m coverage html
 
 # Configuration management - Three simple commands for Claude Desktop
 use-local-code: ## Use MCP Desktop Gateway from local Python code (development)

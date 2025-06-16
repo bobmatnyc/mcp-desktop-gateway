@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2025-06-16
+
+### Added
+- **Complete MCP Desktop Gateway Implementation**: Production-ready universal bridge for Claude Desktop
+- **Multi-Connector Architecture**: Modular system supporting shell, AppleScript, hello_world, and gateway_utils connectors
+- **NPM Package Distribution**: Published as `@mcp/desktop-gateway` with automated setup
+- **Comprehensive Test Suite**: 100+ unit tests covering core components and connectors (~60-70% coverage)
+- **AppleScript Automation**: macOS-specific connectors for Safari, Contacts, Messages, and Finder
+- **User Scripts Management**: Organized system for ad-hoc Python, JavaScript, Shell, and AppleScript code
+- **Configuration Management**: YAML/JSON config loading with environment variable support
+- **Development Tools**: Automated testing, version management, and CI-ready infrastructure
+- **Security Features**: Command validation, input sanitization, and safe execution patterns
+- **Documentation**: Comprehensive project documentation, API specs, and usage guides
+
+### Changed
+- **Version System**: Implemented semantic versioning (SemVer) across all components
+- **Project Structure**: Organized codebase with proper separation of concerns
+- **Configuration**: Unified configuration system with development/production environments
+- **Testing**: From minimal integration tests to comprehensive unit test coverage
+
+### Technical Details
+- **Core Components**: ConnectorRegistry, BaseConnector, ConfigManager with full test coverage
+- **MCP Protocol**: Complete implementation with tools, resources, and prompts support
+- **REST API**: Optional HTTP interface for connector integration
+- **CLI Interface**: Node.js wrapper for Python-based gateway with proper stdio handling
+- **Build System**: Makefile automation for testing, deployment, and version management
+
+## [0.1.0] - 2024-01-11
+
 ### Added
 - Initial release of MCP Gateway
 - Built-in connectors: Shell, AppleScript, Hello World, Gateway Utils

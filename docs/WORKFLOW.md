@@ -116,7 +116,7 @@ What actually happens
 - OS: macOS 14.0
 - Python: 3.11
 - Node: 18.0
-- MCP Gateway: 0.1.0
+- MCP Gateway: 1.0.0
 
 ## Additional Context
 Any other relevant information

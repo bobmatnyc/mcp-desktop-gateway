@@ -14,7 +14,7 @@ if os.path.exists(version_file):
     with open(version_file, 'r') as f:
         version = f.read().strip()
 else:
-    version = "0.1.0"
+    version = "1.0.0"
 
 setup(
     name="mcp-desktop-gateway",

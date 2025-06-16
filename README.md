@@ -83,7 +83,7 @@ Create a custom configuration at `config/config.yaml`:
 ```yaml
 server:
   name: "mcp-desktop-gateway"
-  version: "0.1.0"
+  version: "1.0.0"
   log_level: "INFO"
 
 connectors:

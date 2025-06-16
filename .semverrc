@@ -1,0 +1,45 @@
+# Semantic Versioning Configuration for MCP Desktop Gateway
+
+# Version management strategy
+strategy=semver
+
+# Files to update when version changes
+files=(
+    "VERSION"
+    "package.json"
+    "pyproject.toml"
+    "setup.py"
+    "src/__init__.py"
+    "config/config.yaml"
+)
+
+# Git tag prefix
+tag_prefix="v"
+
+# Changelog file
+changelog="CHANGELOG.md"
+
+# Release notes template
+release_notes_template="docs/templates/release-notes.md"
+
+# Pre-release identifier
+prerelease_identifier="alpha"
+
+# Branch patterns for different version bumps
+[branch_patterns]
+major="release/major/*"
+minor="release/minor/*,feature/*"
+patch="hotfix/*,bugfix/*"
+
+# Commit message patterns for automatic version bumping
+[commit_patterns]
+major="BREAKING CHANGE:"
+minor="feat:"
+patch="fix:"
+
+# Hook commands
+[hooks]
+pre_bump="make test"
+post_bump="npm run build"
+pre_tag="echo 'Creating tag for version'"
+post_tag="echo 'Version tagged successfully'"

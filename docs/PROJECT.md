@@ -1,6 +1,6 @@
 # MCP Desktop Gateway Project Documentation
 
-**Version**: 0.1.0 (Alpha)  
+**Version**: 1.0.0 (Stable)  
 **License**: MIT  
 **Status**: Active Development  
 **NPM Package**: `@mcp/desktop-gateway`

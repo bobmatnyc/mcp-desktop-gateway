@@ -19,7 +19,7 @@ def get_current_version():
     """Get current version from VERSION file"""
     if VERSION_FILE.exists():
         return VERSION_FILE.read_text().strip()
-    return "0.1.0"
+    return "1.0.0"
 
 def parse_version(version):
     """Parse semantic version string"""
