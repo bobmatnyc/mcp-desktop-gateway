@@ -1,0 +1,39 @@
+# Development Configuration
+server:
+  name: "mcp-desktop-gateway-dev"
+  version: "dev"
+  log_level: "DEBUG"  # More verbose logging for development
+
+connectors:
+  # Gateway utilities
+  - name: gateway_utils
+    enabled: true
+    config: {}
+    
+  # Hello World connector 
+  - name: hello_world
+    enabled: true
+    config:
+      greeting: "Welcome to MCP Desktop Gateway DEV!"
+      
+  # Shell connector
+  - name: shell
+    enabled: true
+    config:
+      timeout: 30
+      max_output_length: 10000
+      working_directory: "/Users/masa/Projects/mcp-desktop-gateway"
+      # Allow more commands in dev
+      dangerous_patterns: []  
+      
+  # AppleScript connector
+  - name: applescript
+    enabled: true
+    config:
+      timeout: 30
+      
+  # Test connector (dev only)
+  - name: test_connector
+    enabled: false
+    config:
+      test_mode: true

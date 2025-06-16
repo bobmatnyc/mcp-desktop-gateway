@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "mcp-desktop-gateway": {
+      "command": "python",
+      "args": [
+        "/Users/masa/Projects/mcp-desktop-gateway/run_mcp_gateway.py"
+      ],
+      "env": {
+        "PYTHONPATH": "/Users/masa/Projects/mcp-desktop-gateway"
+      }
+    }
+  }
+}

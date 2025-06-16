@@ -1,0 +1,19 @@
+{
+  "name": "mcp-desktop-gateway-example-connector",
+  "version": "1.0.0",
+  "description": "Example Node.js connector for MCP Desktop Gateway",
+  "main": "example-connector.js",
+  "scripts": {
+    "start": "node example-connector.js",
+    "dev": "nodemon example-connector.js"
+  },
+  "dependencies": {
+    "express": "^4.18.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

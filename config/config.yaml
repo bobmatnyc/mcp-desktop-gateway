@@ -1,0 +1,44 @@
+# MCP Desktop Gateway Configuration
+server:
+  name: "mcp-desktop-gateway"
+  version: "1.0.0"
+  log_level: "INFO"
+
+connectors:
+  # Gateway utilities - built-in tools for gateway management
+  - name: gateway_utils
+    enabled: true
+    config: {}
+    
+  # Hello World connector - demonstrates basic functionality
+  - name: hello_world
+    enabled: true
+    config:
+      greeting: "Welcome to MCP Desktop Gateway!"
+      
+  # Shell connector - system command execution
+  - name: shell
+    enabled: true
+    config:
+      timeout: 30
+      max_output_length: 10000
+      working_directory: "/Users/masa/Projects/mcp-desktop-gateway"
+      
+  # AppleScript connector - macOS automation (macOS only)
+  - name: applescript
+    enabled: true
+    config:
+      timeout: 30
+      
+  # Add more connectors here as needed
+  # Example: External service connectors
+  # - name: github
+  #   enabled: false
+  #   config:
+  #     api_key: ${GITHUB_API_KEY}
+  #
+  # - name: google_drive
+  #   enabled: false
+  #   config:
+  #     client_id: ${GOOGLE_CLIENT_ID}
+  #     client_secret: ${GOOGLE_CLIENT_SECRET}

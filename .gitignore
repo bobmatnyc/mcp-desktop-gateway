@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Environment
+.env
+.env.local
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Runtime
+*.pid
+*.seed
+*.pid.lock
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary
+tmp/
+temp/
+
+# User Scripts - Active scripts are user-generated and should not be committed
+user-scripts/python/active/*
+user-scripts/javascript/active/*
+user-scripts/shell/active/*
+user-scripts/applescript/active/*
+user-scripts/shared/data/*
+user-scripts/shared/logs/*
+
+# Keep directory structure but ignore content
+!user-scripts/python/active/.gitkeep
+!user-scripts/javascript/active/.gitkeep
+!user-scripts/shell/active/.gitkeep
+!user-scripts/applescript/active/.gitkeep
+!user-scripts/shared/data/.gitkeep
+!user-scripts/shared/logs/.gitkeep
+
+# Allow templates and documentation
+!user-scripts/*/templates/
+!user-scripts/shared/configs/
+!user-scripts/README.md

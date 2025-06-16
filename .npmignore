@@ -1,0 +1,52 @@
+# Development files
+*.pyc
+__pycache__/
+.pytest_cache/
+.coverage
+*.egg-info/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.env
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Test files
+tests/
+test_*.py
+*_test.py
+
+# Documentation source
+docs/
+*.md
+!README.md
+!README.npm.md
+
+# Build artifacts
+dist/
+build/
+*.log
+
+# Git files
+.git/
+.gitignore
+.github/
+
+# Development config
+.pylintrc
+.flake8
+pytest.ini
+setup.cfg
+
+# Examples (keep connectors examples)
+# examples/
+
+# Claude Desktop logs
+mcp-server-*.log

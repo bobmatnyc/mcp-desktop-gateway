@@ -1,0 +1,32 @@
+# MCP Desktop Gateway Connector Configuration
+connectors:
+  # Example Python connector
+  - name: example
+    url: http://localhost:8080
+    enabled: true
+    
+  # GitHub connector
+  - name: github
+    url: http://localhost:8081
+    enabled: false
+    auth:
+      type: bearer
+      token: ${GITHUB_TOKEN}
+    
+  # System commands connector
+  - name: system
+    url: http://localhost:8082
+    enabled: false
+    
+  # AppleScript connector
+  - name: applescript
+    url: http://localhost:8083
+    enabled: false
+    
+  # Remote MCP service
+  - name: remote_mcp
+    url: https://remote-mcp-service.example.com
+    enabled: false
+    auth:
+      type: bearer
+      token: ${REMOTE_MCP_TOKEN}

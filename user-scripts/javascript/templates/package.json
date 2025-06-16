@@ -1,0 +1,27 @@
+{
+  "name": "user-script-YYYY-MM-DD-task-name",
+  "version": "1.0.0",
+  "description": "Brief description of the script task",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "dev": "nodemon main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "user-script",
+    "automation",
+    "mcp-desktop-gateway"
+  ],
+  "author": "User",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

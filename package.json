@@ -1,0 +1,50 @@
+{
+  "name": "@mcp/desktop-gateway",
+  "version": "0.1.0",
+  "description": "Universal MCP Gateway for Claude Desktop - Python-based bridge with built-in connectors",
+  "main": "lib/cli.js",
+  "bin": {
+    "mcp-desktop-gateway": "lib/cli.js"
+  },
+  "scripts": {
+    "postinstall": "node lib/cli.js setup",
+    "start": "node lib/cli.js",
+    "setup": "node lib/cli.js setup",
+    "config": "node lib/cli.js config",
+    "test": "cd src && python -m pytest ../tests"
+  },
+  "keywords": [
+    "mcp",
+    "claude",
+    "ai",
+    "bridge",
+    "gateway",
+    "anthropic",
+    "connector"
+  ],
+  "author": "MCP Gateway Team",
+  "license": "MIT",
+  "files": [
+    "lib/**/*",
+    "src/**/*",
+    "config/**/*",
+    "run_mcp_gateway.py",
+    "run_mcp_gateway_simple.py",
+    "requirements.txt",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/mcp-desktop-gateway.git"
+  },
+  "bugs": {
+    "url": "https://github.com/user/mcp-desktop-gateway/issues"
+  },
+  "homepage": "https://github.com/user/mcp-desktop-gateway#readme"
+}

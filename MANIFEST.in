@@ -1,0 +1,12 @@
+include README.md
+include LICENSE
+include VERSION
+include requirements.txt
+recursive-include config *.yaml *.yml
+recursive-include src *.py
+exclude .env*
+exclude *.log
+recursive-exclude __pycache__ *
+recursive-exclude *.egg-info *
+global-exclude *.pyc
+global-exclude .DS_Store

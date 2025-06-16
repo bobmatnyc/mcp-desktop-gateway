@@ -1,0 +1,33 @@
+{
+  "script_config": {
+    "timeout": 30,
+    "max_retries": 3,
+    "batch_size": 100,
+    "log_level": "INFO",
+    "output_format": "json"
+  },
+  "api_settings": {
+    "base_url": "https://api.example.com",
+    "api_version": "v1",
+    "rate_limit": {
+      "requests_per_minute": 60,
+      "burst_limit": 10
+    }
+  },
+  "file_processing": {
+    "supported_formats": ["txt", "csv", "json", "xml"],
+    "max_file_size_mb": 100,
+    "encoding": "utf-8"
+  },
+  "notifications": {
+    "enabled": true,
+    "on_completion": true,
+    "on_error": true,
+    "channels": ["console", "notification"]
+  },
+  "security": {
+    "validate_inputs": true,
+    "sanitize_outputs": true,
+    "allow_shell_commands": false
+  }
+}
