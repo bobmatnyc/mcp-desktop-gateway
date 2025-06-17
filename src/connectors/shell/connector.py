@@ -365,7 +365,20 @@ BEST PRACTICES:
 - Test commands in a safe environment first
 - Use specific paths rather than wildcards
 - Check system info before running platform-specific commands
-- Use list_directory to explore before executing commands"""
+- Use list_directory to explore before executing commands
+
+IMPORTANT - When to use Terminal instead of Shell:
+- Long-running processes (servers, watchers, builds)
+- Interactive commands requiring user input
+- Commands that need real-time output streaming
+- Process monitoring with continuous feedback
+- Development servers (npm run dev, python manage.py runserver)
+
+For these cases, use the AppleScript Terminal connector which provides:
+- Real-time output capture
+- Tab management (no new windows)
+- Interactive command support
+- Better handling of long-running processes"""
             
             return PromptResult(
                 content=content,

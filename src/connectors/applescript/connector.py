@@ -444,15 +444,20 @@ class AppleScriptConnector(BaseConnector):
             ),
             self._create_prompt_definition(
                 name="app_connectors_guide",
-                description="Get detailed guide on using app-specific connectors (Safari, Contacts, Messages, Finder)",
+                description="Get detailed guide on using app-specific connectors (Safari, Contacts, Messages, Finder, Terminal)",
                 arguments=[
                     {
                         "name": "app",
-                        "description": "Specific app to get help with (safari, contacts, messages, finder, or 'all')",
+                        "description": "Specific app to get help with (safari, contacts, messages, finder, terminal, or 'all')",
                         "required": False,
                         "type": "string"
                     }
                 ]
+            ),
+            self._create_prompt_definition(
+                name="terminal_automation",
+                description="Learn effective Terminal automation with AppleScript vs Shell",
+                arguments=[]
             )
         ]
     
@@ -749,12 +754,57 @@ RESOURCES:
 - finder://trash - Trash contents
 """
 
+                terminal_guide = """
+TERMINAL CONNECTOR - Command Line Automation
+
+TOOLS:
+1. terminal_execute_command - Execute command and get output
+   • command: Command to execute
+   • wait_for_output: Wait for completion (default: true)
+   • timeout: Max wait time in seconds (default: 10)
+
+2. terminal_new_tab - Open new Terminal tab (preferred over windows)
+   • command: Optional command to run
+   • title: Optional tab title
+
+3. terminal_get_output - Get visible Terminal output
+   • lines: Number of lines to retrieve (default: 50)
+
+4. terminal_list_tabs - List all Terminal tabs
+5. terminal_switch_tab - Switch to specific tab
+   • tab_index: Tab number (1-based)
+
+6. terminal_close_tab - Close Terminal tab
+   • tab_index: Tab to close (default: current)
+
+7. terminal_clear_screen - Clear Terminal screen
+8. terminal_send_text - Send text without executing
+   • text: Text to send
+   • execute: Press enter after (default: false)
+
+9. terminal_get_working_directory - Get current directory
+10. terminal_set_tab_title - Set tab title
+    • title: New title
+    • tab_index: Tab number (default: current)
+
+RESOURCES:
+- terminal_sessions - Active Terminal session info
+- terminal_history - Recent command history
+
+BEST PRACTICES:
+• Always use tabs instead of new windows
+• Check command output after execution
+• Use wait_for_output=true for important commands
+• Set meaningful tab titles for organization
+• Handle timeouts gracefully for long operations
+"""
+
             # Build response based on requested app
             content = "MCP Desktop Gateway - App Connectors Guide\n\n"
             
             if app == "all":
                 content += "The MCP Desktop Gateway includes specialized connectors for automating common macOS applications.\n\n"
-                content += safari_guide + "\n" + contacts_guide + "\n" + messages_guide + "\n" + finder_guide
+                content += safari_guide + "\n" + contacts_guide + "\n" + messages_guide + "\n" + finder_guide + "\n" + terminal_guide
             elif app == "safari":
                 content += safari_guide
             elif app == "contacts":
@@ -763,8 +813,10 @@ RESOURCES:
                 content += messages_guide
             elif app == "finder":
                 content += finder_guide
+            elif app == "terminal":
+                content += terminal_guide
             else:
-                content += f"Unknown app: {app}\n\nAvailable apps: safari, contacts, messages, finder\nUse 'all' to see documentation for all apps."
+                content += f"Unknown app: {app}\n\nAvailable apps: safari, contacts, messages, finder, terminal\nUse 'all' to see documentation for all apps."
             
             content += "\n\nUSAGE TIPS:\n"
             content += "1. App connectors are automatically available when AppleScript connector is enabled\n"
@@ -776,6 +828,111 @@ RESOURCES:
             return PromptResult(
                 content=content,
                 metadata={"connector": self.name, "prompt": prompt_name, "app": app}
+            )
+        
+        elif prompt_name == "terminal_automation":
+            content = """Terminal Automation Guide - AppleScript vs Shell
+
+The MCP Desktop Gateway provides TWO ways to run terminal commands:
+1. Shell Connector - Direct command execution
+2. AppleScript Terminal Connector - Full Terminal.app automation
+
+WHEN TO USE SHELL CONNECTOR:
+✓ Quick, one-off commands
+✓ Simple file operations
+✓ Getting system information
+✓ Commands that complete quickly
+✓ Non-interactive scripts
+✓ Piped commands with simple output
+
+Examples:
+- ls -la
+- cat file.txt
+- df -h
+- ps aux | grep python
+
+WHEN TO USE APPLESCRIPT TERMINAL CONNECTOR:
+✓ Long-running processes (servers, builds, watchers)
+✓ Interactive commands requiring user input
+✓ Real-time output monitoring
+✓ Development servers (npm run dev, rails server)
+✓ Multiple terminal sessions/tabs
+✓ Commands needing visual feedback
+✓ Build processes with streaming output
+✓ SSH sessions
+✓ Database clients
+✓ Any process you'd normally watch in Terminal
+
+Examples:
+- npm run dev
+- python manage.py runserver
+- docker-compose up
+- tail -f logfile.log
+- ssh user@server
+- mysql -u root -p
+
+KEY DIFFERENCES:
+
+Shell Connector:
+- Executes in background
+- Returns final output only
+- 60-second timeout limit
+- No interactive capability
+- Good for automation scripts
+
+Terminal Connector:
+- Opens in Terminal.app
+- Real-time output streaming
+- No timeout restrictions
+- Full interactivity
+- Tab management
+- Visual feedback
+- Persistent sessions
+
+BEST PRACTICES:
+
+1. START WITH SHELL for simple commands:
+   execute_command(command="git status")
+
+2. SWITCH TO TERMINAL when you need:
+   - To see real-time output
+   - To run servers/watchers
+   - To interact with prompts
+   - To manage multiple sessions
+
+3. TERMINAL WORKFLOW:
+   a) Open new tab (not window):
+      terminal_new_tab(command="npm run dev", title="Dev Server")
+   
+   b) Monitor output:
+      terminal_get_output(lines=50)
+   
+   c) Organize with titles:
+      terminal_set_tab_title(title="Backend API")
+   
+   d) Switch between tabs:
+      terminal_list_tabs()
+      terminal_switch_tab(tab_index=2)
+
+4. COMBINED WORKFLOW:
+   - Use Shell to check prerequisites
+   - Use Terminal for long-running processes
+   - Use Shell for cleanup/verification
+
+Example Development Workflow:
+1. shell: execute_command("git pull")
+2. shell: execute_command("npm install")
+3. terminal: terminal_new_tab(command="npm run dev", title="Frontend")
+4. terminal: terminal_new_tab(command="npm run api", title="Backend")
+5. terminal: terminal_get_output() to verify both started
+6. shell: execute_command("git status") for quick checks
+
+REMEMBER: Terminal automation gives you the full Terminal experience,
+while Shell is for quick, headless command execution."""
+            
+            return PromptResult(
+                content=content,
+                metadata={"connector": self.name, "prompt": prompt_name}
             )
         
         else:
