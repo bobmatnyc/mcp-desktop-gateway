@@ -1,28 +1,89 @@
 # MCP Desktop Gateway Development Makefile
-VERSION := $(shell cat VERSION 2>/dev/null || echo "0.1.0")
+# Modern Python 3.11+ development workflow with Ruff, Pyright, and security scanning
 
-.PHONY: help dev test package clean install-dev test-npm run logs version use-local-code use-npm-package use-original backup-config restore-config config-dev config-npm config-status switch-dev switch-npm
+VERSION := $(shell cat VERSION 2>/dev/null || echo "1.0.0")
+PYTHON := python3.11
+VENV := venv
+PIP := $(VENV)/bin/pip
+PYTEST := $(VENV)/bin/pytest
+RUFF := $(VENV)/bin/ruff
+PYRIGHT := $(VENV)/bin/pyright
+
+.PHONY: help setup dev test lint format type-check security audit clean install-dev test-npm run logs version use-local-code use-npm-package use-original backup-config restore-config config-dev config-npm config-status switch-dev switch-npm
 
 help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-dev: ## Set up development environment
-	@echo "Setting up development environment..."
-	@bash dev-setup.sh
+# Development Environment Setup
+setup: $(VENV) ## Set up modern Python 3.11+ development environment
+	@echo "🚀 Setting up development environment with Python 3.11+ best practices..."
+	$(PIP) install --upgrade pip wheel
+	$(PIP) install -e ".[dev,test,security]"
+	@echo "✅ Development environment ready!"
 
-run: ## Run gateway in development mode
-	@echo "Running MCP Desktop Gateway (dev mode)..."
-	@MCP_DEV_MODE=true ./venv/bin/python run_mcp_gateway.py
+$(VENV):
+	@echo "Creating Python 3.11+ virtual environment..."
+	$(PYTHON) -m venv $(VENV)
+
+dev: setup ## Alias for setup (backward compatibility)
+
+install-dev: setup ## Install development dependencies
+	@echo "📦 Installing development dependencies..."
+	$(PIP) install -e ".[dev,test,security]"
+
+# Code Quality and Formatting
+lint: $(VENV) ## Run Ruff linter (fast, modern replacement for flake8, isort, etc.)
+	@echo "🔍 Running Ruff linter..."
+	$(RUFF) check src tests --fix
+
+format: $(VENV) ## Format code with Ruff (replaces Black + isort)
+	@echo "🎨 Formatting code with Ruff..."
+	$(RUFF) format src tests
+
+type-check: $(VENV) ## Run Pyright type checker
+	@echo "🔍 Running Pyright type checker..."
+	$(PYRIGHT) src
+
+check: lint type-check ## Run all code quality checks
+	@echo "✅ All code quality checks completed!"
+
+# Security Scanning
+security: $(VENV) ## Run security scans (pip-audit, bandit, safety)
+	@echo "🔒 Running security scans..."
+	$(VENV)/bin/pip-audit --desc
+	$(VENV)/bin/bandit -r src -f json -o bandit-report.json || true
+	$(VENV)/bin/safety check --json || true
+	@echo "✅ Security scanning completed!"
+
+audit: security ## Alias for security scanning
+
+# Testing
+test: $(VENV) ## Run tests with coverage using pytest
+	@echo "🧪 Running tests with coverage..."
+	$(PYTEST) -xvs --cov=src --cov-report=term-missing --cov-report=html
+
+test-fast: $(VENV) ## Run tests in parallel (fast)
+	@echo "⚡ Running tests in parallel..."
+	$(PYTEST) -n auto --dist worksteal
+
+test-unit: $(VENV) ## Run unit tests only
+	@echo "🧪 Running unit tests..."
+	$(PYTEST) tests/unit -v
+
+test-integration: $(VENV) ## Run integration tests only
+	@echo "🧪 Running integration tests..."
+	$(PYTEST) tests/integration -v
+
+# Development Workflow
+run: $(VENV) ## Run gateway in development mode
+	@echo "🏃 Running MCP Desktop Gateway (dev mode)..."
+	@MCP_DEV_MODE=true $(VENV)/bin/python run_mcp_gateway.py
 
 verify: test-mcp-current ## Verify all configured MCP services are working
 
-run-simple: ## Run simple gateway
-	@echo "Running Simple MCP Desktop Gateway..."
-	@./venv/bin/python run_mcp_gateway_simple.py
-
-test-python: ## Run Python tests (deprecated - use 'make test')
-	@echo "Running Python tests..."
-	@./venv/bin/python -m pytest tests/ -v
+run-simple: $(VENV) ## Run simple gateway
+	@echo "🏃 Running Simple MCP Desktop Gateway..."
+	@$(VENV)/bin/python run_mcp_gateway_simple.py
 
 test-npm: ## Test NPM package locally
 	@echo "Testing NPM package..."

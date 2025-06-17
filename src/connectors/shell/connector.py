@@ -1,7 +1,13 @@
+"""Shell Connector for MCP Gateway.
+
+Provides secure system command execution with Python 3.11+ features:
+- Structured concurrency with TaskGroups for parallel execution  
+- Exception groups for comprehensive error handling
+- Modern type hints and validation
+- Security scanning and input validation
 """
-Shell Connector for MCP Gateway
-Provides system command execution capabilities
-"""
+
+from __future__ import annotations
 
 import asyncio
 import json
@@ -9,7 +15,9 @@ import os
 import subprocess
 import sys
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Final
+
+from pydantic import BaseModel, Field, validator
 
 from core.base_connector import BaseConnector
 from core.models import (
@@ -18,16 +26,158 @@ from core.models import (
 )
 from core.resource_models import ResourceDefinition, ResourceResult
 
+# Constants following Python 3.11+ best practices
+DEFAULT_TIMEOUT: Final[int] = 30
+MAX_TIMEOUT: Final[int] = 300  # 5 minutes maximum
+DEFAULT_MAX_OUTPUT: Final[int] = 10000
+MAX_OUTPUT_LENGTH: Final[int] = 100000
+
+# Security: Dangerous command patterns to block
+DANGEROUS_PATTERNS: Final[list[str]] = [
+    "rm -rf", "sudo", "su -", "chmod 777", "mkfs", "dd if=", ":(){ :|:& };:",
+    "wget http", "curl http", "nc -", "netcat", "/dev/sda", "/dev/hda"
+]
+
+
+class CommandRequest(BaseModel):
+    """Pydantic model for shell command requests."""
+    
+    command: str = Field(..., min_length=1, max_length=1000, description="Shell command to execute")
+    working_directory: str | None = Field(default=None, description="Working directory for command")
+    timeout: int = Field(default=DEFAULT_TIMEOUT, ge=1, le=MAX_TIMEOUT, description="Command timeout")
+    
+    @validator('command')
+    def validate_command_security(cls, v: str) -> str:
+        """Validate command for security issues."""
+        if not v.strip():
+            raise ValueError("Command cannot be empty")
+            
+        # Check for dangerous patterns
+        command_lower = v.lower()
+        for pattern in DANGEROUS_PATTERNS:
+            if pattern in command_lower:
+                raise ValueError(f"Command contains potentially dangerous pattern: {pattern}")
+        
+        return v.strip()
+
+
+class DirectoryListRequest(BaseModel):
+    """Pydantic model for directory listing requests."""
+    
+    path: str = Field(default=".", description="Directory path to list")
+    show_hidden: bool = Field(default=False, description="Show hidden files")
+    detailed: bool = Field(default=False, description="Show detailed file information")
+    
+    @validator('path')
+    def validate_path(cls, v: str) -> str:
+        """Validate directory path."""
+        if not v or '..' in v:
+            raise ValueError("Invalid path")
+        return v
+
 
 class ShellConnector(BaseConnector):
-    """Shell connector for executing system commands"""
+    """Shell connector for executing system commands with Python 3.11+ features.
     
-    def __init__(self, name: str, config: Dict[str, Any]):
+    Features:
+        - Secure command validation with Pydantic
+        - Structured concurrency with TaskGroups
+        - Exception groups for comprehensive error handling
+        - Modern type hints and async patterns
+    """
+    
+    def __init__(self, name: str, config: dict[str, Any] | None = None) -> None:
+        """Initialize shell connector with modern Python patterns."""
         super().__init__(name, config)
-        self.allowed_commands = config.get('allowed_commands', [])
-        self.working_directory = config.get('working_directory', os.getcwd())
-        self.timeout = config.get('timeout', 30)
-        self.max_output_length = config.get('max_output_length', 10000)
+        self.allowed_commands = self.config.get('allowed_commands', [])
+        self.working_directory = self.config.get('working_directory', os.getcwd())
+        self.timeout = self.config.get('timeout', DEFAULT_TIMEOUT)
+        self.max_output_length = self.config.get('max_output_length', DEFAULT_MAX_OUTPUT)
+    
+    async def execute_parallel_commands(
+        self, 
+        commands: list[str], 
+        timeout: int = DEFAULT_TIMEOUT
+    ) -> list[dict[str, Any]]:
+        """Execute multiple commands in parallel using Python 3.11 TaskGroups.
+        
+        Args:
+            commands: List of shell commands to execute
+            timeout: Maximum execution time for each command
+            
+        Returns:
+            List of execution results
+            
+        Raises:
+            ExceptionGroup: If any commands fail (Python 3.11+ feature)
+        """
+        results: list[dict[str, Any]] = []
+        
+        try:
+            async with asyncio.TaskGroup() as tg:
+                tasks = [
+                    tg.create_task(self._execute_single_command(cmd, timeout))
+                    for cmd in commands
+                ]
+            
+            # Collect results from completed tasks
+            results = [task.result() for task in tasks]
+            
+        except* subprocess.CalledProcessError as eg:
+            # Handle command execution errors using exception groups
+            self.logger.error("Command execution errors: %s", [str(e) for e in eg.exceptions])
+            raise
+        except* asyncio.TimeoutError as eg:
+            # Handle timeout errors
+            self.logger.error("Command timeout errors: %s", [str(e) for e in eg.exceptions])
+            raise
+            
+        return results
+    
+    async def _execute_single_command(
+        self, 
+        command: str, 
+        timeout: int = DEFAULT_TIMEOUT
+    ) -> dict[str, Any]:
+        """Execute a single command asynchronously.
+        
+        Args:
+            command: Shell command to execute
+            timeout: Maximum execution time
+            
+        Returns:
+            Dictionary with execution results
+        """
+        # Validate command using Pydantic
+        request = CommandRequest(command=command, timeout=timeout)
+        
+        try:
+            process = await asyncio.create_subprocess_shell(
+                request.command,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                cwd=self.working_directory
+            )
+            
+            stdout, stderr = await asyncio.wait_for(
+                process.communicate(), 
+                timeout=request.timeout
+            )
+            
+            return {
+                "command": request.command,
+                "return_code": process.returncode,
+                "stdout": stdout.decode('utf-8', errors='replace')[:self.max_output_length],
+                "stderr": stderr.decode('utf-8', errors='replace')[:self.max_output_length],
+                "success": process.returncode == 0
+            }
+            
+        except asyncio.TimeoutError:
+            self.logger.warning("Command timed out: %s", command)
+            raise
+        except Exception as e:
+            self.logger.error("Command execution failed: %s", e)
+            raise
         
     def get_tools(self) -> List[ToolDefinition]:
         """Define shell tools"""

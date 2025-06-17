@@ -1,15 +1,31 @@
-"""
-Terminal AppleScript Connector for MCP Gateway
+"""Terminal AppleScript Connector for MCP Gateway.
 
 This connector provides automation tools for macOS Terminal.app.
 Always prefers opening new tabs over new windows and reviews command output.
+
+Features:
+    - Execute commands with real-time output capture
+    - Tab management (create, switch, close, organize)
+    - Working directory tracking
+    - Interactive command support
+    - Timeout handling with Python 3.11+ structured concurrency
+
+Requires:
+    - Python 3.11+
+    - macOS with Terminal.app
+    - AppleScript execution permissions
 """
 
+from __future__ import annotations
+
+import asyncio
 import json
 import logging
 import subprocess
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Final
+
+from pydantic import BaseModel, Field, validator
 
 from ....core.base_connector import BaseConnector, ToolDefinition, ResourceDefinition
 from ....core.models import (
@@ -19,6 +35,49 @@ from ....core.models import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Constants following Python 3.11+ best practices
+DEFAULT_TIMEOUT: Final[int] = 10
+DEFAULT_OUTPUT_LINES: Final[int] = 50
+MAX_TIMEOUT: Final[int] = 300  # 5 minutes max
+MAX_OUTPUT_LINES: Final[int] = 1000
+
+
+class CommandRequest(BaseModel):
+    """Pydantic model for command execution requests."""
+    
+    command: str = Field(..., min_length=1, description="Command to execute")
+    wait_for_output: bool = Field(default=True, description="Wait for command completion")
+    timeout: int = Field(default=DEFAULT_TIMEOUT, ge=1, le=MAX_TIMEOUT, description="Timeout in seconds")
+    
+    @validator('command')
+    def validate_command(cls, v: str) -> str:
+        """Validate command input."""
+        if not v.strip():
+            raise ValueError("Command cannot be empty")
+        return v.strip()
+
+
+class TabRequest(BaseModel):
+    """Pydantic model for tab management requests."""
+    
+    command: str | None = Field(default=None, description="Optional command to run in new tab")
+    title: str | None = Field(default=None, min_length=1, description="Optional tab title")
+    tab_index: int | None = Field(default=None, ge=1, description="Tab index (1-based)")
+    
+    @validator('title')
+    def validate_title(cls, v: str | None) -> str | None:
+        """Validate tab title."""
+        if v is not None and not v.strip():
+            raise ValueError("Title cannot be empty string")
+        return v.strip() if v else None
+
+
+class OutputRequest(BaseModel):
+    """Pydantic model for output retrieval requests."""
+    
+    lines: int = Field(default=DEFAULT_OUTPUT_LINES, ge=1, le=MAX_OUTPUT_LINES, description="Number of lines to retrieve")
+
 
 class TerminalConnector(BaseConnector):
     """Terminal automation connector using AppleScript"""

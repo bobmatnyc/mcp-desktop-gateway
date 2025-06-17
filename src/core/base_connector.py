@@ -1,10 +1,15 @@
-"""
-Base connector interface for MCP Bridge with Resource support
+"""Base connector interface for MCP Bridge with Resource support.
+
+Modern Python 3.11+ implementation with structured concurrency,
+exception groups, and comprehensive type hints.
 """
 
+from __future__ import annotations
+
+import asyncio
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Final
 
 from .models import ToolContent, ToolDefinition, ToolResult, ToolResultType, UsageStats
 from .resource_models import ResourceDefinition, ResourceResult, ResourceError
@@ -13,20 +18,40 @@ logger = logging.getLogger(__name__)
 
 
 class BaseConnector(ABC):
-    """Base class for all MCP Bridge connectors with resource support"""
+    """Base class for all MCP Bridge connectors with resource support.
+    
+    Modern Python 3.11+ implementation featuring:
+    - Structured concurrency with TaskGroups
+    - Exception groups for better error handling  
+    - Comprehensive type hints
+    - Pydantic validation
+    """
 
-    def __init__(self, name: str, config: Dict[str, Any]):
+    # Class constants
+    DEFAULT_VERSION: Final[str] = "1.0.0"
+    
+    def __init__(self, name: str, config: dict[str, Any] | None = None) -> None:
+        """Initialize the connector with modern Python patterns.
+        
+        Args:
+            name: Unique connector identifier
+            config: Optional configuration dictionary
+        """
         self.name = name
-        self.config = config
+        self.config = config or {}
         self.initialized = False
         self.logger = logging.getLogger(f"connector.{name}")
         self.usage_stats = UsageStats()  # Track cumulative usage
-        self.version = "1.0.0"
+        self.version = self.DEFAULT_VERSION
 
     async def initialize(self) -> None:
-        """Initialize the connector (override if needed)"""
+        """Initialize the connector asynchronously.
+        
+        Override this method to implement connector-specific initialization.
+        Uses Python 3.11+ structured concurrency when needed.
+        """
         self.initialized = True
-        self.logger.info(f"Connector {self.name} initialized")
+        self.logger.info("Connector %s initialized", self.name)
 
     # MCP Prompt Support Methods
     def get_prompts(self) -> List["PromptDefinition"]:
