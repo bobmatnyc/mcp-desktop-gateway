@@ -31,7 +31,7 @@ class AppleScriptConnector(BaseConnector):
         tools = [
             ToolDefinition(
                 name="run_applescript",
-                description="Execute AppleScript code",
+                description="Execute AppleScript code. Note: MCP Gateway includes specialized app connectors for Safari (web automation), Contacts, Messages, Finder, and Terminal with dedicated tools. Use 'app_connectors_guide' prompt for details.",
                 input_schema={
                     "type": "object",
                     "properties": {
@@ -426,6 +426,11 @@ class AppleScriptConnector(BaseConnector):
         """Define AppleScript prompts"""
         return [
             self._create_prompt_definition(
+                name="available_adapters",
+                description="List all available AppleScript tool adapters for macOS app automation",
+                arguments=[]
+            ),
+            self._create_prompt_definition(
                 name="applescript_help",
                 description="Get comprehensive help with AppleScript automation and available app connectors",
                 arguments=[]
@@ -464,8 +469,61 @@ class AppleScriptConnector(BaseConnector):
     async def execute_prompt(self, prompt_name: str, arguments: Dict[str, Any]) -> PromptResult:
         """Execute AppleScript prompts"""
         
-        if prompt_name == "applescript_help":
+        if prompt_name == "available_adapters":
+            content = """Available AppleScript Tool Adapters in MCP Desktop Gateway
+
+The MCP Desktop Gateway provides specialized AppleScript adapters for automating common macOS applications. Each adapter includes multiple tools and resources for comprehensive automation.
+
+🌐 SAFARI CONNECTOR (15 tools)
+• Web browser automation: open URLs, manage tabs, execute JavaScript, take screenshots
+• Tools: safari_open_url, safari_get_tabs, safari_execute_javascript, safari_take_screenshot, etc.
+• Resources: safari://tabs, safari://current, safari://bookmarks, safari://history
+
+📇 CONTACTS CONNECTOR (10 tools)  
+• Contact management: search, create, update, delete contacts and groups
+• Tools: contacts_search, contacts_create, contacts_update, contacts_delete, etc.
+• Resources: contacts://all, contacts://groups, contacts://recent
+
+💬 MESSAGES CONNECTOR (10 tools)
+• Text messaging automation: send messages, manage conversations, search history
+• Tools: messages_send, messages_get_conversations, messages_search, messages_send_file, etc.
+• Resources: messages://conversations, messages://unread, messages://recent
+
+📁 FINDER CONNECTOR (10 tools)
+• File system GUI operations: navigate folders, manage files, search, trash operations
+• Tools: finder_open, finder_get_selection, finder_move_to_trash, finder_search, etc.
+• Resources: finder://desktop, finder://selection, finder://trash
+
+🖥️ TERMINAL CONNECTOR (10 tools)
+• Terminal.app automation: execute commands, manage tabs, capture output
+• Tools: terminal_execute_command, terminal_new_tab, terminal_get_output, etc.
+• Resources: terminal://sessions, terminal://history
+
+QUICK START:
+1. Use 'app_connectors_guide' prompt with app name for detailed documentation
+2. Example: app_connectors_guide with app="safari" for Safari-specific help
+3. Or use app="all" to see documentation for all connectors
+
+NOTE: These adapters are automatically available when the AppleScript connector is enabled."""
+            
+            return PromptResult(
+                content=content,
+                metadata={"connector": self.name, "prompt": prompt_name}
+            )
+        
+        elif prompt_name == "applescript_help":
             content = """AppleScript Connector - Comprehensive Help Guide
+
+🚀 AVAILABLE APP-SPECIFIC CONNECTORS:
+The MCP Desktop Gateway includes 5 specialized AppleScript adapters with 55+ tools total:
+• 🌐 Safari (15 tools) - Web automation, JavaScript execution, screenshots
+• 📇 Contacts (10 tools) - Contact management and vCard operations  
+• 💬 Messages (10 tools) - Text messaging and conversation management
+• 📁 Finder (10 tools) - File system GUI operations
+• 🖥️ Terminal (10 tools) - Terminal.app automation
+
+💡 Use 'available_adapters' prompt for a complete list of all tools
+💡 Use 'app_connectors_guide' prompt for detailed app-specific documentation
 
 BASIC APPLESCRIPT TOOLS:
 1. run_applescript - Execute custom AppleScript code
@@ -495,13 +553,16 @@ BASIC APPLESCRIPT TOOLS:
    • text: Text to copy to clipboard
    • Example: text="Hello, clipboard!"
 
-APP-SPECIFIC CONNECTORS:
-The MCP Desktop Gateway includes specialized connectors for common macOS apps.
-Use the 'app_connectors_guide' prompt for detailed information about:
-• Safari - Web browser automation
-• Contacts - Contact management
-• Messages - Text messaging automation
-• Finder - File system operations
+APP-SPECIFIC CONNECTORS (55+ TOOLS):
+The MCP Desktop Gateway includes 5 specialized AppleScript adapters:
+• Safari (15 tools) - safari_open_url, safari_execute_javascript, safari_take_screenshot, etc.
+• Contacts (10 tools) - contacts_search, contacts_create, contacts_update, etc.
+• Messages (10 tools) - messages_send, messages_get_conversations, messages_search, etc.
+• Finder (10 tools) - finder_open, finder_get_selection, finder_move_to_trash, etc.
+• Terminal (10 tools) - terminal_execute_command, terminal_new_tab, terminal_get_output, etc.
+
+📌 Use 'available_adapters' prompt for complete tool list
+📌 Use 'app_connectors_guide' prompt for detailed documentation
 
 RESOURCES:
 - applescript://apps - List of running applications
