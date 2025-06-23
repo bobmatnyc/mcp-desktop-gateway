@@ -495,7 +495,7 @@ class ShellConnector(BaseConnector):
             content = """Shell Connector Help:
 
 AVAILABLE TOOLS:
-1. execute_command - Run shell commands safely
+1. execute_command - Run shell commands safely AND write scripts
 2. list_directory - Browse file system
 3. get_system_info - Get system information
 
@@ -505,30 +505,60 @@ SAFETY FEATURES:
 - Timeout protection (max 60 seconds)
 - No sudo or administrative commands allowed
 
-EXAMPLE USAGE:
-- execute_command: "ls -la"
-- execute_command: "ps aux | grep python"
-- list_directory: path="/Users" show_hidden=true
-- get_system_info: (no parameters)
+PRIMARY USES:
+1. SCRIPT WRITING - Create scripts locally using shell commands:
+   - Python scripts: echo "code" > script.py
+   - JavaScript: cat > app.js << EOF...EOF
+   - Shell scripts: printf '#!/bin/bash\\n...' > script.sh
+   - Any text files for local processing
 
-BEST PRACTICES:
-- Test commands in a safe environment first
-- Use specific paths rather than wildcards
-- Check system info before running platform-specific commands
-- Use list_directory to explore before executing commands
+2. QUICK COMMANDS - Fast operations without visual feedback:
+   - File operations: ls, cp, mv, mkdir
+   - System info: ps, df, whoami
+   - Text processing: grep, sed, awk
+   - Git operations: status, diff, log
+
+EXAMPLE USAGE:
+- Write Python script: execute_command('cat > analyze.py << EOF
+#!/usr/bin/env python3
+import pandas as pd
+df = pd.read_csv("data.csv")
+print(df.describe())
+EOF')
+- Quick check: execute_command("ls -la")
+- System info: get_system_info()
+
+BEST PRACTICES FOR SCRIPT WRITING:
+- Use heredocs (cat << EOF) for multi-line scripts
+- Add shebangs (#!/usr/bin/env python3) for executables
+- Set permissions: chmod +x script.sh
+- Verify creation: ls -la script.*
 
 IMPORTANT - When to use Terminal instead of Shell:
+- SCRIPT EXECUTION - Run scripts with visual feedback
 - Long-running processes (servers, watchers, builds)
 - Interactive commands requiring user input
 - Commands that need real-time output streaming
 - Process monitoring with continuous feedback
 - Development servers (npm run dev, python manage.py runserver)
 
-For these cases, use the AppleScript Terminal connector which provides:
+WORKFLOW PATTERN:
+1. Use Shell to WRITE scripts locally
+2. Use Terminal to EXECUTE scripts with visual feedback
+3. Use Shell to VERIFY file system results
+4. Use Terminal to MONITOR ongoing processes
+
+For script execution, use the AppleScript Terminal connector which provides:
+- Visual feedback in Terminal.app
 - Real-time output capture
-- Tab management (no new windows)
+- Tab management (single window, multiple tabs)
 - Interactive command support
-- Better handling of long-running processes"""
+- No timeout restrictions
+
+VERIFICATION REMINDER:
+Always verify results in BOTH places after script execution:
+- Terminal output: terminal_get_output()
+- File system: execute_command("ls -la output/")"""
             
             return PromptResult(
                 content=content,

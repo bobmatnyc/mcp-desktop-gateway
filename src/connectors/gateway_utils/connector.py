@@ -322,21 +322,25 @@ The MCP Desktop Gateway provides comprehensive automation and integration capabi
 === CORE CONNECTORS ===
 
 1. SHELL CONNECTOR
-Purpose: Execute system commands and file operations
+Purpose: Script writing, system commands, and file operations
 Key Tools:
-• execute_command - Run shell commands with safety checks
+• execute_command - Write scripts locally AND run shell commands
 • list_directory - Browse file system
 • get_system_info - Get system information
+Primary Uses:
+• SCRIPT WRITING - Create Python, JavaScript, Shell scripts locally
+• Quick commands without visual feedback
+• File system verification after script execution
 Resources:
 • shell://env - Environment variables
 • shell://cwd - Current working directory
 Prompts:
-• shell_help - Command safety guidelines
+• shell_help - Script writing and command guidelines
 • system_analysis - Basic system diagnostics
 • user_scripts_guide - User scripts management
 
 2. APPLESCRIPT CONNECTOR (macOS)
-Purpose: macOS application automation
+Purpose: macOS application automation and script execution
 Basic Tools:
 • run_applescript - Execute custom AppleScript
 • system_notification - Display notifications
@@ -347,13 +351,23 @@ App-Specific Connectors:
 • Contacts - Contact management (10 tools)
 • Messages - Text messaging (10 tools)
 • Finder - File system GUI (10 tools)
+• Terminal - Script execution with visual feedback (10 tools)
+Terminal Connector Features:
+• SCRIPT EXECUTION - Run scripts with real-time output
+• Tab management (single window, multiple tabs)
+• Visual feedback for user interaction
+• No timeout restrictions
+• Process monitoring
 Resources:
 • applescript://apps - Running applications
 • applescript://system - System information
+• terminal_sessions - Active Terminal sessions
+• terminal_history - Command history
 Prompts:
 • applescript_help - Complete AppleScript guide
 • app_connectors_guide - App-specific documentation
 • automate_task - Task automation guidance
+• terminal_automation - Shell vs Terminal usage guide
 
 3. GATEWAY UTILS CONNECTOR
 Purpose: Gateway management and diagnostics
@@ -437,25 +451,54 @@ Key Settings:
 
 === COMMON WORKFLOWS ===
 
-1. Web Automation:
+1. SCRIPT DEVELOPMENT WORKFLOW (RECOMMENDED):
+   Script Writing → Execution → Verification
+   
+   a) Write script using Shell:
+      - execute_command('cat > process_data.py << EOF
+        #!/usr/bin/env python3
+        import pandas as pd
+        # Your code here
+        EOF')
+   
+   b) Execute in Terminal for visual feedback:
+      - terminal_new_tab(command="python process_data.py", title="Data Processing")
+      - User can see real-time output and interact if needed
+   
+   c) Verify results in BOTH places:
+      - Terminal output: terminal_get_output()
+      - File system: execute_command("ls -la output/")
+   
+   This pattern ensures:
+   - Scripts are written locally (Shell)
+   - Execution has visual feedback (Terminal)
+   - Results are verified comprehensively
+
+2. Web Automation:
    - Use safari_open_url to navigate
    - safari_execute_javascript for page interaction
    - safari_get_page_source for scraping
 
-2. Contact Management:
+3. Contact Management:
    - contacts_search to find people
    - contacts_create/update for modifications
    - contacts_export_vcard for backups
 
-3. File Operations:
+4. File Operations:
    - shell commands for bulk operations
    - finder tools for GUI-based selection
    - user scripts for repeated tasks
 
-4. Messaging:
+5. Messaging:
    - messages_send for notifications
    - messages_get_conversations for monitoring
    - messages_send_file for sharing
+
+6. Parallel Processing:
+   - Open multiple Terminal tabs for concurrent operations
+   - terminal_new_tab(command="npm run frontend", title="Frontend")
+   - terminal_new_tab(command="npm run backend", title="Backend")
+   - Switch between tabs to monitor progress
 
 === GETTING HELP ===
 

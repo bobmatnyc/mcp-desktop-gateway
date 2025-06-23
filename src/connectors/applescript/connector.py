@@ -895,10 +895,11 @@ BEST PRACTICES:
             content = """Terminal Automation Guide - AppleScript vs Shell
 
 The MCP Desktop Gateway provides TWO ways to run terminal commands:
-1. Shell Connector - Direct command execution
-2. AppleScript Terminal Connector - Full Terminal.app automation
+1. Shell Connector - Direct command execution and script writing
+2. AppleScript Terminal Connector - Full Terminal.app automation with visual feedback
 
 WHEN TO USE SHELL CONNECTOR:
+✓ Writing scripts locally (Python, JavaScript, Shell, etc.)
 ✓ Quick, one-off commands
 ✓ Simple file operations
 ✓ Getting system information
@@ -907,15 +908,14 @@ WHEN TO USE SHELL CONNECTOR:
 ✓ Piped commands with simple output
 
 Examples:
-- ls -la
-- cat file.txt
-- df -h
-- ps aux | grep python
+- Writing scripts: echo "python code" > script.py
+- Quick commands: ls -la, cat file.txt, df -h
+- System info: ps aux | grep python
 
 WHEN TO USE APPLESCRIPT TERMINAL CONNECTOR:
+✓ Script execution with real-time output monitoring
 ✓ Long-running processes (servers, builds, watchers)
 ✓ Interactive commands requiring user input
-✓ Real-time output monitoring
 ✓ Development servers (npm run dev, rails server)
 ✓ Multiple terminal sessions/tabs
 ✓ Commands needing visual feedback
@@ -925,8 +925,8 @@ WHEN TO USE APPLESCRIPT TERMINAL CONNECTOR:
 ✓ Any process you'd normally watch in Terminal
 
 Examples:
+- python user-scripts/python/active/my-script.py
 - npm run dev
-- python manage.py runserver
 - docker-compose up
 - tail -f logfile.log
 - ssh user@server
@@ -935,6 +935,7 @@ Examples:
 KEY DIFFERENCES:
 
 Shell Connector:
+- Script writing and file creation
 - Executes in background
 - Returns final output only
 - 60-second timeout limit
@@ -942,54 +943,69 @@ Shell Connector:
 - Good for automation scripts
 
 Terminal Connector:
-- Opens in Terminal.app
+- Script execution with visual feedback
+- Opens in Terminal.app (single window, multiple tabs)
 - Real-time output streaming
 - No timeout restrictions
 - Full interactivity
 - Tab management
-- Visual feedback
 - Persistent sessions
+- User can see and interact with results
 
 BEST PRACTICES:
 
-1. START WITH SHELL for simple commands:
-   execute_command(command="git status")
-
-2. SWITCH TO TERMINAL when you need:
-   - To see real-time output
-   - To run servers/watchers
-   - To interact with prompts
-   - To manage multiple sessions
-
-3. TERMINAL WORKFLOW:
-   a) Open new tab (not window):
-      terminal_new_tab(command="npm run dev", title="Dev Server")
+1. SCRIPT WORKFLOW:
+   a) Write scripts using Shell:
+      execute_command(command='cat > script.py << EOF
+#!/usr/bin/env python3
+import sys
+print("Hello from script")
+EOF')
    
-   b) Monitor output:
+   b) Execute scripts in Terminal:
+      terminal_new_tab(command="python script.py", title="Script Output")
+   
+   c) Monitor execution:
       terminal_get_output(lines=50)
    
-   c) Organize with titles:
-      terminal_set_tab_title(title="Backend API")
-   
-   d) Switch between tabs:
-      terminal_list_tabs()
-      terminal_switch_tab(tab_index=2)
+   d) Verify results in BOTH places:
+      - Check Terminal output: terminal_get_output()
+      - Check file system: execute_command("ls -la output/")
+
+2. TERMINAL TAB MANAGEMENT:
+   - Always use tabs (not new windows) for asynchronous operation
+   - Open multiple tabs for parallel processes:
+     terminal_new_tab(command="npm run frontend", title="Frontend")
+     terminal_new_tab(command="npm run backend", title="Backend")
+   - Switch between tabs to monitor different processes
+
+3. VERIFICATION STRATEGY:
+   - After running scripts in Terminal, ALWAYS verify:
+     a) Terminal output: terminal_get_output()
+     b) File system changes: execute_command("ls -la")
+     c) Process status: execute_command("ps aux | grep scriptname")
+   - This dual verification ensures accurate results
 
 4. COMBINED WORKFLOW:
-   - Use Shell to check prerequisites
-   - Use Terminal for long-running processes
-   - Use Shell for cleanup/verification
+   - Use Shell to write scripts and prepare environment
+   - Use Terminal to execute and monitor scripts
+   - Use Shell to verify file system results
+   - Use Terminal to check execution output
 
 Example Development Workflow:
-1. shell: execute_command("git pull")
-2. shell: execute_command("npm install")
-3. terminal: terminal_new_tab(command="npm run dev", title="Frontend")
-4. terminal: terminal_new_tab(command="npm run api", title="Backend")
-5. terminal: terminal_get_output() to verify both started
-6. shell: execute_command("git status") for quick checks
+1. shell: execute_command("mkdir -p output")
+2. shell: Write script using cat or echo
+3. terminal: terminal_new_tab(command="python script.py", title="Processing")
+4. terminal: terminal_get_output() to monitor progress
+5. shell: execute_command("ls -la output/") to verify results
+6. terminal: Check for any error messages in Terminal
 
-REMEMBER: Terminal automation gives you the full Terminal experience,
-while Shell is for quick, headless command execution."""
+IMPORTANT REMINDERS:
+- Script writing: Use Shell connector
+- Script execution: Use Terminal connector (visual feedback)
+- Always verify in both Terminal output AND file system
+- Use tabs for multiple concurrent operations
+- Terminal provides the full interactive experience users expect"""
             
             return PromptResult(
                 content=content,

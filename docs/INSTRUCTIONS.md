@@ -1,226 +1,487 @@
-# 🔧 Python Microservices - Development Instructions
+# Python Development Instructions
 
-**Version**: 1.0  
-**Updated**: June 8, 2025
+This document provides best practices and guidelines for Python development in microservices and desktop integration projects.
 
-## 📌 1. Core Philosophy
+## Development Environment Setup
 
-These guidelines are for developers building robust, scalable, and maintainable microservices in Python. Our philosophy is rooted in Python's own principles:
+### Python Version Management
+- Use Python 3.11+ for modern features and performance improvements
+- Use `pyenv` or `asdf` for managing Python versions
+- Always specify the exact Python version in `pyproject.toml`
 
-- **Simplicity & Readability**: Prefer clear, straightforward code over complex, clever solutions. Readability counts.
-- **Explicit is better than implicit**: Service contracts, configurations, and dependencies should be clearly defined.
-- **Autonomy & Responsibility**: Each service should be independently deployable and managed by a team that owns it end-to-end.
-
-> You are expected to follow all guidelines by default. Any deviation requires explicit justification and team consensus.
-
----
-
-## 🧠 2. Core Principles
-
-- **Build for Resilience**: Services can and will fail. Design for failure with patterns like retries, circuit breakers, and graceful degradation.
-- **Single Responsibility Principle**: Each microservice should have one, well-defined responsibility.
-- **Loose Coupling, High Cohesion**: Services should be loosely coupled (minimal dependencies on each other) while the code within a service should be highly cohesive (logically related).
-- **Automation First**: Automate everything: testing, linting, building, deployment, and monitoring.
-- **API as a Contract**: The API is the public contract of a service. It must be well-documented, versioned, and stable.
-
----
-
-## 🛠️ 3. Development Environment
-
-### Python Version
-- This project uses **Python 3.11+**.
-- Use a tool like `pyenv` to manage different Python versions on your local machine.
-
-### Virtual Environments
-- All Python development **MUST** happen inside a virtual environment to isolate project dependencies.
-- Use the built-in `venv` module.
-
+### Virtual Environment
 ```bash
-# Create a virtual environment
-python3 -m venv venv
+# Create virtual environment
+python -m venv venv
 
-# Activate it (macOS/Linux)
-source venv/bin/activate
+# Activate virtual environment
+source venv/bin/activate  # Unix/macOS
+venv\Scripts\activate     # Windows
 
-# Activate it (Windows)
-.\venv\Scripts\activate
+# Install dependencies
+pip install -e ".[dev]"
 ```
 
-### Dependency Management
-- **Primary Tool**: `pip` with `requirements.txt` files.
-- **Best Practice**: Use `pip-tools` to manage dependencies.
-  - Define direct dependencies in a `requirements.in` file.
-  - Compile it to a `requirements.txt` file with pinned, transitive dependencies.
+### IDE Configuration
+- **VS Code**: Install Python, Pylance, and Ruff extensions
+- **PyCharm**: Enable type checking and configure Ruff
+- Configure auto-formatting on save
+- Enable type checking in strict mode
 
-```bash
-# Install pip-tools
-pip install pip-tools
+## Code Style and Standards
 
-# After creating requirements.in, compile it:
-pip-compile requirements.in > requirements.txt
-
-# Install dependencies from the locked file
-pip install -r requirements.txt
+### Code Formatting
+- Use **Ruff** for linting and formatting (replaces Black, isort, flake8)
+- Configure in `pyproject.toml`:
+```toml
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+select = ["E", "F", "UP", "B", "SIM", "I"]
 ```
-- Each service should have its own `requirements.in` and `requirements.txt`.
 
----
+### Type Hints
+- Use type hints for all function signatures
+- Use `from typing import` for complex types
+- Enable strict type checking with mypy or pyright
+```python
+from typing import Optional, List, Dict, Any
 
-## 🏗️ 4. Project & Service Structure
-
-We recommend a monorepo structure for discoverability and simplified dependency management of shared libraries.
-
+def process_data(items: List[Dict[str, Any]]) -> Optional[str]:
+    """Process a list of dictionaries and return result."""
+    ...
 ```
-/
-├── services/
-│   ├── service-a/
-│   │   ├── src/             # Service source code
-│   │   ├── tests/           # Service tests
-│   │   ├── Dockerfile
-│   │   └── requirements.in
-│   └── service-b/
-│       └── ...
-├── libs/
-│   └── shared-library/      # Shared code (e.g., Pydantic models)
-│       └── ...
+
+### Docstrings
+- Use Google-style docstrings for consistency
+- Document all public functions, classes, and modules
+```python
+def calculate_score(value: float, weight: float = 1.0) -> float:
+    """Calculate weighted score.
+    
+    Args:
+        value: The base value to score
+        weight: Optional weight multiplier (default: 1.0)
+        
+    Returns:
+        The calculated weighted score
+        
+    Raises:
+        ValueError: If value is negative
+    """
+```
+
+## Project Structure
+
+### Standard Layout
+```
+project/
+├── src/
+│   └── package_name/
+│       ├── __init__.py
+│       ├── main.py
+│       ├── models/
+│       ├── services/
+│       ├── utils/
+│       └── config.py
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── conftest.py
 ├── docs/
 ├── scripts/
-└── docker-compose.yml       # For local development orchestration
+├── pyproject.toml
+├── README.md
+└── .gitignore
 ```
 
----
+### Module Organization
+- Keep modules focused and single-purpose
+- Use `__init__.py` to control public API
+- Avoid circular imports
+- Use relative imports within the package
 
-## ✅ 5. Code Quality & Style
+## Async Programming
 
-We enforce a consistent code style to improve readability and reduce cognitive load. This is automated using pre-commit hooks.
+### AsyncIO Best Practices
+```python
+import asyncio
+from typing import List
 
-### Tooling
-- **Formatting**: `black` for uncompromising code formatting.
-- **Linting & More**: `ruff` for extremely fast linting, import sorting, and enforcement of best practices.
-- **Type Checking**: `mypy` for static type analysis.
+async def fetch_data(url: str) -> dict:
+    """Fetch data from URL asynchronously."""
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            return await response.json()
 
-### Pre-commit Hooks
-- Configure these tools to run automatically before each commit using `pre-commit`.
-- A sample `.pre-commit-config.yaml` can be found in project templates.
-
-```bash
-# Install pre-commit
-pip install pre-commit
-
-# Set up the git hooks
-pre-commit install
+async def process_multiple(urls: List[str]) -> List[dict]:
+    """Process multiple URLs concurrently."""
+    tasks = [fetch_data(url) for url in urls]
+    return await asyncio.gather(*tasks)
 ```
 
----
+### Context Managers
+```python
+from contextlib import asynccontextmanager
 
-## ⚙️ 6. Microservice Development
-
-### Web Framework
-- **Recommended**: `FastAPI` for its high performance, async support, and automatic OpenAPI documentation.
-- **Alternative**: `Flask` for simpler services.
-
-### Configuration
-- Follow the **12-Factor App** methodology. Store configuration in environment variables.
-- Use `.env` files for local development. **NEVER** commit `.env` files.
-- **Recommended**: Use `pydantic-settings` to load environment variables into a typed, validated configuration object.
-
-### Inter-Service Communication
-- **Synchronous (Request/Reply)**: Use RESTful APIs over HTTP. Define your schema with Pydantic models, which FastAPI uses to generate OpenAPI specs.
-- **Asynchronous (Event-Driven)**: For decoupling services, use a message broker like **RabbitMQ** or **Kafka**. This is preferred for non-blocking communication.
-- **High-Performance RPC**: For internal, high-throughput communication, consider using **gRPC**.
-
-### Logging
-- Use **structured logging** (e.g., JSON format). This is critical for effective log analysis in a distributed system.
-- The standard `logging` library can be configured for this, or use a library like `structlog`.
-
----
-
-## 🧪 7. Testing Standards
-
-- **Framework**: `pytest` is the standard for all Python testing.
-- **Test Types**:
-  - **Unit Tests**: Test individual functions and classes in isolation. Mock external dependencies.
-  - **Integration Tests**: Test a service's interaction with other components like databases or external APIs. These can run against live test instances (e.g., a test database in Docker).
-  - **Contract Tests**: Verify that a service adheres to the API contract expected by its consumers.
-- **Code Coverage**: Aim for a minimum of **80%** test coverage. Use `pytest-cov`.
-- **API Testing**: Use `httpx` within `pytest` to make requests to your service's API endpoints.
-
-```bash
-# Run tests for a service
-pytest
-
-# Run tests with coverage report
-pytest --cov=src
+@asynccontextmanager
+async def managed_resource():
+    """Manage resource lifecycle."""
+    resource = await acquire_resource()
+    try:
+        yield resource
+    finally:
+        await resource.cleanup()
 ```
 
----
+## Error Handling
 
-## 🐳 8. Containerization
+### Exception Hierarchy
+```python
+class AppError(Exception):
+    """Base exception for application errors."""
+    pass
 
-- All services **MUST** be containerized using `Docker`.
-- Write a `Dockerfile` for each service.
-- **Best Practices for Python Dockerfiles**:
-  - Use multi-stage builds to keep production images small.
-  - Run as a non-root user for security.
-  - Optimize for layer caching.
+class ValidationError(AppError):
+    """Raised when validation fails."""
+    pass
 
-### Local Orchestration
-- Use `docker-compose.yml` to define and run all the project's services for local development. This makes it trivial to spin up the entire environment.
-
-```bash
-# Build and start all services
-docker-compose up --build
-
-# Run in detached mode
-docker-compose up -d
-
-# Stop services
-docker-compose down
+class ConnectionError(AppError):
+    """Raised when connection fails."""
+    pass
 ```
 
----
+### Error Handling Patterns
+```python
+import logging
+from typing import Optional
 
-## 🚀 9. CI/CD
+logger = logging.getLogger(__name__)
 
-A CI/CD pipeline (e.g., using GitHub Actions) should be configured to automate the following workflow on every pull request and merge to `main`:
-
-1. **Install Dependencies**.
-2. **Run Code Quality Checks**: `black`, `ruff`, `mypy`.
-3. **Run All Tests**: `pytest --cov`.
-4. **Build Docker Images**: For each service.
-5. (On merge to `main`) **Push Docker Images** to a container registry (e.g., Docker Hub, AWS ECR).
-6. **Deploy** to the appropriate environment.
-
----
-
-## 📘 10. Documentation
-
-- **API Documentation**: If using FastAPI, OpenAPI documentation is automatically generated. Ensure it's clear by using good Pydantic model descriptions.
-- **Code Documentation**: Use **Google-style** docstrings for all public modules, classes, and functions.
-- **Architectural Documentation**: For significant new features or architectural changes, a **Design Document** is required. Store these in the `docs/design/` directory.
-
-### Design Document Structure
-```md
-# Feature/System Name
-
-## 1. Summary
-What is this and why are we building it?
-
-## 2. Problem & Scope
-The pain point this addresses and explicit non-goals.
-
-## 3. Technical Design
-High-level architecture, data models, service interactions, and technology choices with rationale.
-
-## 4. Implementation Plan
-Phases, key milestones, and dependencies.
-
-## 5. Open Questions
-Unresolved issues to be addressed.
+def safe_operation() -> Optional[str]:
+    """Perform operation with proper error handling."""
+    try:
+        result = risky_operation()
+        return result
+    except ValidationError as e:
+        logger.warning(f"Validation failed: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}", exc_info=True)
+        raise AppError(f"Operation failed: {e}") from e
 ```
 
----
+## Testing
 
-## 👁️ Final Note
+### Test Structure
+```python
+import pytest
+from unittest.mock import Mock, patch
 
-Clear standards and thoughtful documentation create velocity. Write them like you're briefing a future teammate (or your future self).
+class TestUserService:
+    """Test cases for UserService."""
+    
+    @pytest.fixture
+    def service(self):
+        """Create service instance for testing."""
+        return UserService(mock_db)
+    
+    def test_create_user(self, service):
+        """Test user creation."""
+        user = service.create_user("test@example.com")
+        assert user.email == "test@example.com"
+    
+    @pytest.mark.asyncio
+    async def test_async_operation(self, service):
+        """Test async operation."""
+        result = await service.async_method()
+        assert result is not None
+```
+
+### Testing Best Practices
+- Write tests first (TDD) when possible
+- Aim for 80%+ code coverage
+- Use fixtures for common test data
+- Mock external dependencies
+- Test edge cases and error conditions
+
+## Configuration Management
+
+### Environment Variables
+```python
+import os
+from typing import Optional
+from pydantic import BaseSettings
+
+class Settings(BaseSettings):
+    """Application settings."""
+    
+    app_name: str = "MyApp"
+    debug: bool = False
+    database_url: Optional[str] = None
+    api_key: Optional[str] = None
+    
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+
+settings = Settings()
+```
+
+### Configuration Files
+- Use YAML or TOML for complex configurations
+- Validate configurations at startup
+- Provide sensible defaults
+- Document all configuration options
+
+## Logging
+
+### Structured Logging
+```python
+import logging
+import json
+from datetime import datetime
+
+class JSONFormatter(logging.Formatter):
+    """Format logs as JSON."""
+    
+    def format(self, record):
+        log_data = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "level": record.levelname,
+            "logger": record.name,
+            "message": record.getMessage(),
+            "module": record.module,
+            "function": record.funcName,
+        }
+        if record.exc_info:
+            log_data["exception"] = self.formatException(record.exc_info)
+        return json.dumps(log_data)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+handler = logging.StreamHandler()
+handler.setFormatter(JSONFormatter())
+logger.addHandler(handler)
+```
+
+## Dependency Management
+
+### Using pyproject.toml
+```toml
+[project]
+name = "my-project"
+version = "0.1.0"
+description = "Project description"
+dependencies = [
+    "aiohttp>=3.8",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+]
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+```
+
+### Dependency Best Practices
+- Pin major versions in production
+- Use optional dependencies for dev tools
+- Regularly update dependencies
+- Check for security vulnerabilities
+
+## Security Best Practices
+
+### Input Validation
+```python
+from pydantic import BaseModel, validator, EmailStr
+
+class UserInput(BaseModel):
+    """Validate user input."""
+    
+    email: EmailStr
+    age: int
+    
+    @validator("age")
+    def validate_age(cls, v):
+        if v < 0 or v > 150:
+            raise ValueError("Invalid age")
+        return v
+```
+
+### Secrets Management
+- Never hardcode secrets
+- Use environment variables or secret managers
+- Rotate secrets regularly
+- Log security events
+
+## Performance Optimization
+
+### Profiling
+```python
+import cProfile
+import pstats
+from functools import wraps
+
+def profile(func):
+    """Profile function execution."""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        profiler = cProfile.Profile()
+        profiler.enable()
+        result = func(*args, **kwargs)
+        profiler.disable()
+        stats = pstats.Stats(profiler)
+        stats.sort_stats("cumulative")
+        stats.print_stats(10)
+        return result
+    return wrapper
+```
+
+### Caching
+```python
+from functools import lru_cache
+import asyncio
+
+@lru_cache(maxsize=128)
+def expensive_computation(n: int) -> int:
+    """Cache expensive computation results."""
+    return sum(i ** 2 for i in range(n))
+
+# For async functions
+from aiocache import cached
+
+@cached(ttl=300)  # Cache for 5 minutes
+async def fetch_user_data(user_id: str) -> dict:
+    """Fetch and cache user data."""
+    return await database.get_user(user_id)
+```
+
+## Documentation
+
+### API Documentation
+- Use docstrings for auto-generated docs
+- Document all public APIs
+- Include examples in docstrings
+- Keep documentation up-to-date
+
+### README Structure
+1. Project overview
+2. Installation instructions
+3. Quick start guide
+4. API reference
+5. Contributing guidelines
+6. License information
+
+## Continuous Integration
+
+### GitHub Actions Example
+```yaml
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        pip install -e ".[dev]"
+    - name: Run tests
+      run: |
+        pytest --cov=src --cov-report=xml
+    - name: Run linting
+      run: |
+        ruff check .
+        mypy src/
+```
+
+## Debugging Tips
+
+### Using debugpy
+```python
+# For remote debugging
+import debugpy
+debugpy.listen(5678)
+debugpy.wait_for_client()  # Pause until debugger connects
+```
+
+### Logging for Debugging
+```python
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+
+logger = logging.getLogger(__name__)
+logger.debug(f"Variable state: {variable}")
+```
+
+## Common Pitfalls to Avoid
+
+1. **Mutable Default Arguments**
+   ```python
+   # Bad
+   def append_to_list(item, target=[]):
+       target.append(item)
+       return target
+   
+   # Good
+   def append_to_list(item, target=None):
+       if target is None:
+           target = []
+       target.append(item)
+       return target
+   ```
+
+2. **Not Using Context Managers**
+   ```python
+   # Bad
+   file = open("data.txt")
+   data = file.read()
+   file.close()
+   
+   # Good
+   with open("data.txt") as file:
+       data = file.read()
+   ```
+
+3. **Ignoring Async Context**
+   ```python
+   # Bad
+   def sync_in_async():
+       time.sleep(1)  # Blocks event loop
+   
+   # Good
+   async def async_proper():
+       await asyncio.sleep(1)  # Non-blocking
+   ```
+
+## Resources
+
+- [Python Official Documentation](https://docs.python.org/3/)
+- [Real Python Tutorials](https://realpython.com/)
+- [Python Packaging Guide](https://packaging.python.org/)
+- [Async IO Documentation](https://docs.python.org/3/library/asyncio.html)
+- [Type Hints PEP 484](https://www.python.org/dev/peps/pep-0484/)

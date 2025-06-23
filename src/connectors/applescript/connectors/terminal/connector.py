@@ -216,11 +216,17 @@ class TerminalConnector(BaseConnector):
                 "name": "terminal_automation",
                 "description": "Guide for Terminal automation tasks",
                 "prompt": """I'll help you automate Terminal tasks. I can:
-- Execute commands and capture output
-- Open new tabs (preferred over new windows)
-- Navigate between tabs
+- Execute scripts with visual feedback (written via Shell connector)
+- Execute commands and capture real-time output
+- Open new tabs in a single window (for asynchronous operations)
+- Navigate between tabs and monitor multiple processes
 - Get command output and working directories
 - Set tab titles for organization
+
+IMPORTANT WORKFLOW:
+1. Write scripts using Shell connector (execute_command)
+2. Execute scripts in Terminal for visual feedback
+3. Verify results in BOTH Terminal output AND file system
 
 What Terminal automation task would you like to accomplish?"""
             }
