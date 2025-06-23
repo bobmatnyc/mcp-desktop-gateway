@@ -1,9 +1,9 @@
 # MCP Gateway Development Workflow
 
-**Version**: 1.0  
-**Updated**: 2024-01-11  
+**Version**: 1.1  
+**Updated**: 2025-06-23  
 
-This document defines the development workflow for the MCP Gateway project.
+This document defines the development workflow for the MCP Gateway project, including prompt training system development.
 
 ## 🔁 Git Workflow
 
@@ -42,6 +42,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 **Examples:**
 ```bash
 feat(shell): add timeout configuration
+feat(training): add automatic prompt training system
 fix(gateway): handle connection errors properly
 docs(readme): update installation instructions
 chore(deps): update mcp to 0.2.0
@@ -92,6 +93,7 @@ Use labels to categorize:
 
 - `component:core` - Core gateway functionality
 - `component:connector` - Connector-related
+- `component:training` - Prompt training system
 - `component:cli` - NPM/CLI wrapper
 - `component:docs` - Documentation
 
@@ -155,6 +157,9 @@ make version-bump-major
    ```bash
    make test
    make test-npm
+   # Test prompt training system
+   python -m prompt_training.cli init
+   python -m prompt_training.cli train status
    ```
 
 4. **Create release branch**

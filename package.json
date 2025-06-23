@@ -1,7 +1,7 @@
 {
   "name": "@bobmatnyc/mcp-desktop-gateway",
-  "version": "1.0.0",
-  "description": "Universal MCP Gateway for Claude Desktop - Python-based bridge with built-in connectors",
+  "version": "1.1.0",
+  "description": "Universal MCP Gateway for Claude Desktop - Python-based bridge with built-in connectors and automatic prompt training",
   "author": "Robert (Masa) Matsuoka <bobmatnyc@users.noreply.github.com>",
   "main": "lib/cli.js",
   "bin": {
@@ -24,7 +24,11 @@
     "bridge",
     "gateway",
     "anthropic",
-    "connector"
+    "connector",
+    "prompt-training",
+    "langchain",
+    "machine-learning",
+    "automation"
   ],
   "license": "MIT",
   "files": [

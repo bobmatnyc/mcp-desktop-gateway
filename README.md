@@ -5,12 +5,14 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Node.js 16+](https://img.shields.io/badge/node-16+-green.svg)](https://nodejs.org)
 
-Universal MCP Gateway for Claude Desktop - Python-based bridge with built-in system automation tools.
+Universal MCP Gateway for Claude Desktop - Python-based bridge with built-in system automation tools and intelligent prompt training.
 
 ## ✨ Features
 
 - 🚀 **One-command installation** via NPM
-- 🔧 **15 built-in tools** for system automation
+- 🔧 **15+ built-in tools** for system automation
+- 🧠 **Automatic Prompt Training** - LangChain-powered continuous improvement
+- 🎯 **Smart Learning** - Improves based on user feedback and errors
 - 🌐 **Cross-platform** support (macOS, Linux, Windows)
 - 🔐 **Security features** including command filtering and timeouts
 - 📦 **Zero configuration** - works out of the box
@@ -54,7 +56,7 @@ get_running_apps()
 ## 🛠 Built-in Tools
 
 ### Shell Tools (Cross-platform)
-- `execute_command` - Run shell commands safely
+- `execute_command` - Run shell commands safely (script writing)
 - `list_directory` - Browse the filesystem  
 - `get_system_info` - Get system information
 
@@ -65,6 +67,20 @@ get_running_apps()
 - `control_app` - Control applications (activate, quit, hide)
 - `get_clipboard` / `set_clipboard` - Clipboard management
 
+### Terminal Tools (macOS)
+- `terminal_execute_command` - Execute commands with visual feedback
+- `terminal_new_tab` - Open new Terminal tabs for parallel processes
+- `terminal_get_output` - Monitor command output in real-time
+- `terminal_list_tabs` - Manage multiple Terminal sessions
+
+### Prompt Training Tools
+- `rate_response` - Rate the quality of responses (0.0-1.0)
+- `suggest_improvement` - Suggest prompt improvements
+- `report_issue` - Report problems with responses
+- `get_training_status` - Check automatic training status
+- `trigger_training` - Manually trigger prompt training
+- `get_training_history` - View training history for prompts
+
 ### Gateway Management
 - `list_connectors` - Show active connectors
 - `gateway_health` - Check gateway status
@@ -73,8 +89,26 @@ get_running_apps()
 ## 📋 Resources & Prompts
 
 The gateway also provides:
-- **10 resources** for accessing system information
-- **8 prompts** for guided assistance and help
+- **15+ resources** for accessing system information and training data
+- **12+ prompts** for guided assistance, workflow help, and training guidance
+
+## 🧠 Prompt Training System
+
+The gateway includes an advanced automatic prompt training system:
+
+### Key Features
+- **Automatic Feedback Collection** from all user interactions
+- **Smart Training Triggers** based on error rates, ratings, and feedback volume
+- **Four Training Approaches**: Few-shot, Reinforcement, Meta-prompt, Adversarial
+- **Continuous Monitoring** checks prompts hourly for improvement opportunities
+- **Safe Deployment** with thorough evaluation and optional auto-deployment
+
+### Getting Started with Training
+1. Set your OpenAI API key: `export OPENAI_API_KEY=your-key`
+2. Initialize the system: `python -m prompt_training.cli init`
+3. Training happens automatically based on usage patterns!
+
+For detailed documentation, see [Prompt Training README](src/prompt_training/README.md).
 
 ## 🔧 Configuration
 

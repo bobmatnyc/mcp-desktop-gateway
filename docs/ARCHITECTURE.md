@@ -23,6 +23,17 @@
 │  │  - SSE Streaming    │  │  - Health Check │  │  - Auth Inject │  │
 │  │  - Tool Registry    │  │  - Aggregation  │  │  - Namespacing │  │
 │  └─────────────────────┘  └─────────────────┘  └────────────────┘  │
+│                                                                       │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │                 Prompt Training System                        │  │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌──────────────────────┐    │  │
+│  │  │ Feedback    │ │ Auto        │ │ LangChain Training   │    │  │
+│  │  │ Collector   │ │ Trainer     │ │ - Few-shot Learning  │    │  │
+│  │  │ - Ratings   │ │ - Monitor   │ │ - Reinforcement      │    │  │
+│  │  │ - Errors    │ │ - Triggers  │ │ - Meta-prompt        │    │  │
+│  │  │ - Success   │ │ - Deploy    │ │ - Adversarial        │    │  │
+│  │  └─────────────┘ └─────────────┘ └──────────────────────┘    │  │
+│  └───────────────────────────────────────────────────────────────┘  │
 └────────────────────────────────┬─────────────────────────────────────┘
                                  │
                                  │ HTTP REST API
@@ -74,6 +85,30 @@
 - Automatic retry with backoff
 - Circuit breaker pattern
 - Response caching
+
+### Prompt Training System
+
+**Responsibilities:**
+- Automatically collect feedback from user interactions
+- Monitor prompts for training opportunities
+- Train improved versions using LangChain and ML
+- Evaluate new versions and manage deployment
+- Maintain version history and rollback capability
+
+**Components:**
+- **Feedback Collector**: Captures ratings, errors, success metrics, and suggestions
+- **Automatic Trainer**: Monitors feedback patterns and triggers training
+- **LangChain Integration**: Four training approaches (few-shot, reinforcement, meta-prompt, adversarial)
+- **Prompt Manager**: Version control and deployment management
+- **Evaluation Framework**: Automated testing with quality metrics
+
+**Training Flow:**
+1. Collect feedback during normal operations
+2. Monitor for training triggers (error rates, ratings, volume)
+3. Select optimal training approach based on feedback patterns
+4. Train new version using LangChain
+5. Evaluate against baseline with safety checks
+6. Deploy if meets quality thresholds
 
 ### HTTP Connectors
 

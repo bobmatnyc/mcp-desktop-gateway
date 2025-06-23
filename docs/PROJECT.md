@@ -1,18 +1,20 @@
 # MCP Desktop Gateway Project Documentation
 
-**Version**: 1.0.0 (Stable)  
+**Version**: 1.1.0 (Stable)  
 **License**: MIT  
 **Status**: Active Development  
 **NPM Package**: `@bobmatnyc/mcp-desktop-gateway`
 
 ## Overview
 
-MCP Desktop Gateway is a Python-based Model Context Protocol (MCP) server that acts as a universal bridge between Claude Desktop and various tools and services. Distributed as an NPM package for easy installation, it provides built-in system automation capabilities and an extensible architecture for custom connectors.
+MCP Desktop Gateway is a Python-based Model Context Protocol (MCP) server that acts as a universal bridge between Claude Desktop and various tools and services. Distributed as an NPM package for easy installation, it provides built-in system automation capabilities, an advanced prompt training system, and an extensible architecture for custom connectors.
 
 ## Key Features
 
 - 🚀 **Easy Installation**: One-command setup via NPM
 - 🔧 **Built-in Tools**: Shell commands, AppleScript automation, and more
+- 🧠 **Automatic Prompt Training**: LangChain-powered continuous improvement system
+- 🎯 **Smart Feedback Learning**: Automatically improves based on user interactions and errors
 - 🌐 **Extensible**: Support for custom connectors via HTTP API
 - 🔐 **Secure**: Command filtering, timeouts, and sandboxing
 - 📦 **Cross-platform**: Works on macOS, Linux, and Windows
@@ -45,17 +47,35 @@ mcp-desktop-gateway/
 │   │   ├── config.py          # Configuration management
 │   │   ├── models.py          # Data models
 │   │   └── registry.py        # Connector registry
-│   └── connectors/            # Built-in connectors
-│       ├── shell/             # System command execution
-│       ├── applescript/       # macOS automation
-│       ├── hello_world/       # Example connector
-│       └── gateway_utils/     # Gateway management
+│   ├── connectors/            # Built-in connectors
+│   │   ├── shell/             # System command execution
+│   │   ├── applescript/       # macOS automation
+│   │   ├── hello_world/       # Example connector
+│   │   └── gateway_utils/     # Gateway management
+│   └── prompt_training/       # Prompt training system
+│       ├── feedback_collector.py  # Feedback collection
+│       ├── prompt_manager.py      # Version control
+│       ├── prompt_trainer.py      # LangChain training
+│       ├── auto_trainer.py        # Automatic training
+│       ├── evaluation.py          # Testing framework
+│       ├── integration.py         # MCP Gateway integration
+│       ├── cli.py                 # Command line interface
+│       └── models.py              # Training data models
+├── prompt_training/           # Training data and config
+│   ├── configs/              # Configuration files
+│   ├── feedback/             # Collected feedback
+│   ├── versions/             # Prompt versions
+│   └── evaluation/           # Test suites and results
 ├── lib/                       # NPM wrapper
 │   └── cli.js                # Node.js CLI entry point
 ├── config/                    # Configuration files
 │   ├── config.yaml           # Default configuration
 │   └── config.dev.yaml       # Development configuration
 ├── docs/                      # Documentation
+│   ├── PROJECT.md            # This file
+│   ├── ARCHITECTURE.md       # System architecture
+│   ├── INSTRUCTIONS.md       # Development guidelines
+│   └── WORKFLOW.md           # Development workflow
 ├── tests/                     # Test suite
 ├── scripts/                   # Utility scripts
 │   └── version.py            # Version management
@@ -95,19 +115,31 @@ make run
 ### 1. Shell Connector
 - **Tools**: `execute_command`, `list_directory`, `get_system_info`
 - **Resources**: `shell://env`, `shell://cwd`
+- **Purpose**: Script writing and quick command execution
 - **Security**: Command filtering, timeout protection
 
 ### 2. AppleScript Connector (macOS)
 - **Tools**: `run_applescript`, `system_notification`, `control_app`, `get_clipboard`, `set_clipboard`
+- **Sub-connectors**: Safari, Contacts, Messages, Finder, Terminal
 - **Resources**: `applescript://apps`, `applescript://system`
+- **Purpose**: macOS automation and script execution with visual feedback
 - **Platform**: macOS only
 
-### 3. Gateway Utils
+### 3. Prompt Training Connector
+- **Tools**: `rate_response`, `suggest_improvement`, `report_issue`, `get_training_status`, `trigger_training`, `get_training_history`
+- **Purpose**: Automatic prompt improvement using LangChain and ML
+- **Features**: 
+  - Automatic feedback collection from user interactions
+  - Intelligent training approach selection (few-shot, reinforcement, meta-prompt, adversarial)
+  - Continuous monitoring and improvement
+  - Safe deployment with thorough evaluation
+
+### 4. Gateway Utils
 - **Tools**: `list_connectors`, `gateway_health`, `reload_config`
 - **Resources**: `gateway://utils/config`, `gateway://utils/manifest`
 - **Purpose**: Gateway management and diagnostics
 
-### 4. Hello World
+### 5. Hello World
 - **Tools**: `hello_world`, `gateway_info`, `echo`
 - **Resources**: `gateway://hello/status`, `gateway://hello/logs`
 - **Purpose**: Example and testing
@@ -125,6 +157,76 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
   }
 }
 ```
+
+For prompt training features, also set your OpenAI API key:
+```bash
+export OPENAI_API_KEY=your-api-key
+```
+
+## Prompt Training System
+
+The MCP Desktop Gateway includes an advanced prompt training system that automatically improves prompts based on user feedback and error patterns.
+
+### Key Features
+
+- **Automatic Feedback Collection**: Captures user ratings, errors, and success metrics from all interactions
+- **Intelligent Training**: Four training approaches automatically selected based on feedback patterns:
+  - **Few-shot Learning**: For prompts with many successful examples
+  - **Reinforcement Learning**: For fixing low ratings and specific issues  
+  - **Meta-prompt Optimization**: For incorporating user suggestions
+  - **Adversarial Training**: For handling edge cases and robustness
+- **Continuous Monitoring**: Checks all prompts hourly for training opportunities
+- **Safe Deployment**: Thorough evaluation and optional auto-deployment with safety checks
+
+### Training Triggers
+
+The system automatically triggers training when:
+- **Error Rate > 20%** → Uses adversarial training for robustness
+- **Average Rating < 0.6** → Uses reinforcement learning for satisfaction
+- **50+ Feedback Items** → Uses few-shot learning to leverage accumulated knowledge
+- **3+ User Suggestions** → Uses meta-prompt optimization to incorporate feedback
+
+### CLI Commands
+
+```bash
+# Initialize prompt training system
+python -m prompt_training.cli init
+
+# Check automatic training status
+python -m prompt_training.cli train status
+
+# Start automatic training service
+python -m prompt_training.cli train start-auto
+
+# Manually trigger training
+python -m prompt_training.cli train trigger my_prompt --approach few_shot
+
+# View training history
+python -m prompt_training.cli train history my_prompt
+
+# Export improved prompts
+python -m prompt_training.cli prompt export ./external_prompts
+```
+
+### Configuration
+
+Enable automatic training by adding to your configuration:
+
+```yaml
+connectors:
+  - name: prompt_training
+    type: prompt_training
+    enabled: true
+    config:
+      auto_collect: true
+      collect_errors: true
+      collect_success: true
+      prompt_improvement_enabled: true
+      openai_api_key: ${OPENAI_API_KEY}
+      config_path: "prompt_training/configs/auto_training.json"
+```
+
+For detailed documentation, see [`src/prompt_training/README.md`](../src/prompt_training/README.md).
 
 ## Development Workflow
 
