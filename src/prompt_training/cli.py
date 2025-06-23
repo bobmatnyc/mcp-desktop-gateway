@@ -14,6 +14,7 @@ from .feedback_collector import FeedbackCollector
 from .prompt_manager import PromptManager
 from .prompt_trainer import PromptTrainer
 from .evaluation import PromptEvaluator
+from .auto_trainer import AutomaticPromptTrainer
 from .models import PromptType, FeedbackType
 
 
@@ -223,6 +224,91 @@ def run(prompt_id: str, approach: str, min_feedback: int, api_key: str):
             click.echo("Training could not be started (insufficient feedback?)", err=True)
             
     asyncio.run(_train())
+
+
+@train.command('status')
+@click.option('--api-key', envvar='OPENAI_API_KEY')
+def status(api_key: str):
+    """Check automatic training status"""
+    async def _status():
+        collector = FeedbackCollector()
+        manager = PromptManager()
+        auto_trainer = AutomaticPromptTrainer(collector, manager, openai_api_key=api_key)
+        
+        status = auto_trainer.get_training_status()
+        
+        click.echo(f"\nAutomatic Training Status:")
+        click.echo(f"  Enabled: {status['enabled']}")
+        click.echo(f"  Running: {status['running']}")
+        click.echo(f"  Training Queue: {len(status['training_queue'])} prompts")
+        click.echo(f"  Recent Training: {len(status['recent_training'])} prompts")
+        
+        if status['training_queue']:
+            click.echo(f"\nQueued for Training:")
+            for prompt_id in status['training_queue']:
+                click.echo(f"  - {prompt_id}")
+                
+        if status['recent_training']:
+            click.echo(f"\nRecent Training Sessions:")
+            for prompt_id, timestamp in status['recent_training'].items():
+                click.echo(f"  - {prompt_id}: {timestamp[:19]}")
+                
+    asyncio.run(_status())
+
+
+@train.command('start-auto')
+@click.option('--config', type=click.Path(), help='Configuration file for auto-trainer')
+@click.option('--api-key', envvar='OPENAI_API_KEY')
+def start_auto(config: Optional[str], api_key: str):
+    """Start automatic training service"""
+    async def _start():
+        collector = FeedbackCollector()
+        manager = PromptManager()
+        auto_trainer = AutomaticPromptTrainer(
+            collector, 
+            manager, 
+            openai_api_key=api_key,
+            config_path=config
+        )
+        
+        await collector.start()
+        await auto_trainer.start()
+        
+        click.echo("Automatic training service started")
+        click.echo("Press Ctrl+C to stop...")
+        
+        try:
+            while True:
+                await asyncio.sleep(60)
+                # Show periodic status
+                status = auto_trainer.get_training_status()
+                if status['training_queue']:
+                    click.echo(f"Training queue: {len(status['training_queue'])} prompts")
+                    
+        except KeyboardInterrupt:
+            click.echo("\nStopping automatic training service...")
+            await auto_trainer.stop()
+            await collector.stop()
+            
+    asyncio.run(_start())
+
+
+@train.command('trigger')
+@click.argument('prompt_id')
+@click.option('--approach', type=click.Choice(['few_shot', 'reinforcement', 'meta_prompt', 'adversarial']))
+@click.option('--api-key', envvar='OPENAI_API_KEY')
+def trigger(prompt_id: str, approach: Optional[str], api_key: str):
+    """Manually trigger automatic training for a prompt"""
+    async def _trigger():
+        collector = FeedbackCollector()
+        manager = PromptManager()
+        auto_trainer = AutomaticPromptTrainer(collector, manager, openai_api_key=api_key)
+        
+        click.echo(f"Triggering training for {prompt_id}...")
+        await auto_trainer.trigger_manual_training(prompt_id, approach)
+        click.echo("Training request submitted")
+        
+    asyncio.run(_trigger())
 
 
 @cli.group()

@@ -9,10 +9,12 @@ from .feedback_collector import FeedbackCollector
 from .prompt_trainer import PromptTrainer
 from .prompt_manager import PromptManager
 from .evaluation import PromptEvaluator
+from .auto_trainer import AutomaticPromptTrainer
 
 __all__ = [
     'FeedbackCollector',
     'PromptTrainer', 
     'PromptManager',
-    'PromptEvaluator'
+    'PromptEvaluator',
+    'AutomaticPromptTrainer'
 ]

@@ -13,6 +13,7 @@ from core.base_connector import BaseConnector
 from core.models import PromptResult, ToolResponse
 from .feedback_collector import FeedbackCollector
 from .prompt_manager import PromptManager
+from .auto_trainer import AutomaticPromptTrainer
 from .models import PromptType, FeedbackType
 
 logger = logging.getLogger(__name__)
@@ -21,10 +22,18 @@ logger = logging.getLogger(__name__)
 class PromptTrainingMiddleware:
     """Middleware to integrate prompt training with MCP Gateway"""
     
-    def __init__(self, enabled: bool = True, config_path: Optional[str] = None):
+    def __init__(self, enabled: bool = True, config_path: Optional[str] = None, openai_api_key: Optional[str] = None):
         self.enabled = enabled
         self.feedback_collector = FeedbackCollector()
         self.prompt_manager = PromptManager()
+        
+        # Initialize automatic trainer
+        self.auto_trainer = AutomaticPromptTrainer(
+            feedback_collector=self.feedback_collector,
+            prompt_manager=self.prompt_manager,
+            openai_api_key=openai_api_key,
+            config_path=config_path
+        )
         
         # Load configuration
         self.config = self._load_config(config_path)
@@ -32,9 +41,10 @@ class PromptTrainingMiddleware:
         # Session tracking
         self.session_id = str(datetime.now().timestamp())
         
-        # Start feedback collector
+        # Start services
         if self.enabled:
             asyncio.create_task(self.feedback_collector.start())
+            asyncio.create_task(self.auto_trainer.start())
             
     def _load_config(self, config_path: Optional[str]) -> Dict[str, Any]:
         """Load training configuration"""
@@ -231,6 +241,7 @@ class PromptTrainingMiddleware:
         """Shutdown the training middleware"""
         if self.enabled:
             await self.feedback_collector.stop()
+            await self.auto_trainer.stop()
 
 
 class PromptTrainingConnector(BaseConnector):
@@ -312,6 +323,47 @@ class PromptTrainingConnector(BaseConnector):
                     },
                     "required": ["prompt_id", "issue_type", "description"]
                 }
+            ),
+            ToolDefinition(
+                name="get_training_status",
+                description="Get status of automatic prompt training",
+                input_schema={
+                    "type": "object",
+                    "properties": {}
+                }
+            ),
+            ToolDefinition(
+                name="trigger_training",
+                description="Manually trigger training for a prompt",
+                input_schema={
+                    "type": "object",
+                    "properties": {
+                        "prompt_id": {
+                            "type": "string",
+                            "description": "ID of the prompt to train"
+                        },
+                        "approach": {
+                            "type": "string",
+                            "enum": ["few_shot", "reinforcement", "meta_prompt", "adversarial"],
+                            "description": "Training approach to use (optional)"
+                        }
+                    },
+                    "required": ["prompt_id"]
+                }
+            ),
+            ToolDefinition(
+                name="get_training_history",
+                description="Get training history for a prompt",
+                input_schema={
+                    "type": "object",
+                    "properties": {
+                        "prompt_id": {
+                            "type": "string",
+                            "description": "ID of the prompt"
+                        }
+                    },
+                    "required": ["prompt_id"]
+                }
             )
         ]
         
@@ -360,6 +412,68 @@ class PromptTrainingConnector(BaseConnector):
                         type="text",
                         text="Issue reported. Thank you for helping improve the system!"
                     )]
+                )
+                
+            elif tool_name == "get_training_status":
+                status = self.middleware.auto_trainer.get_training_status()
+                
+                status_text = f"""Automatic Prompt Training Status:
+                
+Enabled: {status['enabled']}
+Running: {status['running']}
+Training Queue: {len(status['training_queue'])} prompts
+Recent Training: {len(status['recent_training'])} prompts
+
+Configuration:
+- Check Interval: {status['config']['check_interval_seconds']}s
+- Min Feedback: {status['config']['min_feedback_for_training']}
+- Error Rate Threshold: {status['config']['training_triggers']['error_rate_threshold']:.1%}
+- Low Rating Threshold: {status['config']['training_triggers']['low_rating_threshold']:.2f}
+- Auto Deploy: {status['config']['auto_deploy']['enabled']}
+
+{f"Queued for Training: {', '.join(status['training_queue'])}" if status['training_queue'] else "No prompts in training queue"}"""
+
+                return ToolResult(
+                    content=[ToolContent(type="text", text=status_text)]
+                )
+                
+            elif tool_name == "trigger_training":
+                prompt_id = arguments["prompt_id"]
+                approach = arguments.get("approach")
+                
+                # Trigger manual training
+                await self.middleware.auto_trainer.trigger_manual_training(prompt_id, approach)
+                
+                return ToolResult(
+                    content=[ToolContent(
+                        type="text",
+                        text=f"Training triggered for {prompt_id}" + 
+                             (f" using {approach} approach" if approach else "")
+                    )]
+                )
+                
+            elif tool_name == "get_training_history":
+                prompt_id = arguments["prompt_id"]
+                history = self.middleware.auto_trainer.get_prompt_training_history(prompt_id)
+                
+                if not history:
+                    return ToolResult(
+                        content=[ToolContent(
+                            type="text",
+                            text=f"No training history found for {prompt_id}"
+                        )]
+                    )
+                    
+                history_text = f"Training History for {prompt_id}:\n\n"
+                for i, session in enumerate(history[-5:], 1):  # Show last 5 sessions
+                    history_text += f"{i}. {session['timestamp'][:19]}\n"
+                    history_text += f"   Approach: {session['training_approach']}\n"
+                    history_text += f"   Version: v{session['current_version']} → v{session['new_version']}\n"
+                    history_text += f"   Recommendation: {session['evaluation']['recommendation']}\n"
+                    history_text += f"   Auto-deployed: {session.get('auto_deployed', 'N/A')}\n\n"
+                    
+                return ToolResult(
+                    content=[ToolContent(type="text", text=history_text)]
                 )
                 
             else:

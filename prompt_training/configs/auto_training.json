@@ -1,0 +1,28 @@
+{
+  "enabled": true,
+  "check_interval_seconds": 3600,
+  "min_feedback_for_training": 10,
+  "min_hours_between_training": 24,
+  "training_triggers": {
+    "error_rate_threshold": 0.2,
+    "low_rating_threshold": 0.6,
+    "feedback_count_threshold": 50,
+    "improvement_suggestion_count": 3
+  },
+  "approach_selection": {
+    "error_dominant": "adversarial",
+    "low_rating": "reinforcement", 
+    "many_suggestions": "meta_prompt",
+    "default": "few_shot"
+  },
+  "auto_deploy": {
+    "enabled": false,
+    "min_improvement": 0.1,
+    "min_safety_score": 0.9,
+    "require_human_review": true
+  },
+  "notification": {
+    "log_training_events": true,
+    "save_training_reports": true
+  }
+}
